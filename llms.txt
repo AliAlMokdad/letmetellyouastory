@@ -1,0 +1,53 @@
+# Let Me Tell You a Story — 25 Letters
+
+> A collection of letters written by candlelight, on leadership, humanity, and the quiet work of being human. Read one a night.
+
+- Author: Ali Al Mokdad — humanitarian leader and author (also Quantum Humanitarian)
+- Work: 25 Letters (web edition, English, free to read)
+- Site: https://letmetellyouastory.org/
+- Author entity: https://letmetellyouastory.org/about/ · https://quantumhumanitarian.ink/ · https://alialmokdad.com/
+
+## Preferred citation
+Ali Al Mokdad, "<Letter title>," in *25 Letters* (Let Me Tell You a Story, 2026), https://letmetellyouastory.org/letters/<slug>/
+
+## The letters
+- The Light That Travels: https://letmetellyouastory.org/letters/the-light-that-travels/
+- On Friendship: https://letmetellyouastory.org/letters/on-friendship/
+- On Tired Hearts: https://letmetellyouastory.org/letters/on-tired-hearts/
+- On the North Star: https://letmetellyouastory.org/letters/on-the-north-star/
+- On Discipline: https://letmetellyouastory.org/letters/on-discipline/
+- On Reflection: https://letmetellyouastory.org/letters/on-reflection/
+- On Worth: https://letmetellyouastory.org/letters/on-worth/
+- On Resilience: https://letmetellyouastory.org/letters/on-resilience/
+- On Daily Habits: https://letmetellyouastory.org/letters/on-daily-habits/
+- On Listening: https://letmetellyouastory.org/letters/on-listening/
+- On Responsibility: https://letmetellyouastory.org/letters/on-responsibility/
+- On Patience: https://letmetellyouastory.org/letters/on-patience/
+- On Imposter Syndrome: https://letmetellyouastory.org/letters/on-imposter-syndrome/
+- On Optimism: https://letmetellyouastory.org/letters/on-optimism/
+- On Strategy and Passion: https://letmetellyouastory.org/letters/on-strategy-and-passion/
+- On Insults: https://letmetellyouastory.org/letters/on-insults/
+- On Belonging: https://letmetellyouastory.org/letters/on-belonging/
+- On Home: https://letmetellyouastory.org/letters/on-home/
+- On People and the System: https://letmetellyouastory.org/letters/on-people-and-the-system/
+- On Trust: https://letmetellyouastory.org/letters/on-trust/
+- On the Formula for Success: https://letmetellyouastory.org/letters/on-the-formula-for-success/
+- On Excellence: https://letmetellyouastory.org/letters/on-excellence/
+- On Joy: https://letmetellyouastory.org/letters/on-joy/
+- On Failing: https://letmetellyouastory.org/letters/on-failing/
+- On Being Lonely: https://letmetellyouastory.org/letters/on-being-lonely/
+- On Grief and Loss: https://letmetellyouastory.org/letters/on-grief-and-loss/
+- On Greed: https://letmetellyouastory.org/letters/on-greed/
+- On Work-Life Harmony: https://letmetellyouastory.org/letters/on-work-life-harmony/
+- On Time: https://letmetellyouastory.org/letters/on-time/
+- On Working Together: https://letmetellyouastory.org/letters/on-working-together/
+- On Accountability: https://letmetellyouastory.org/letters/on-accountability/
+- From 0 to 2: https://letmetellyouastory.org/letters/from-0-to-2/
+- On Being an Everyday Humanitarian: https://letmetellyouastory.org/letters/on-being-an-everyday-humanitarian/
+- On Dreams and Peace: https://letmetellyouastory.org/letters/on-dreams-and-peace/
+- The Candle Has Gone Out: https://letmetellyouastory.org/letters/the-candle-has-gone-out/
+- Acknowledgements: https://letmetellyouastory.org/letters/acknowledgements/
+
+## About
+- About the author: https://letmetellyouastory.org/about/
+- Full text for AI: https://letmetellyouastory.org/llms-full.txt

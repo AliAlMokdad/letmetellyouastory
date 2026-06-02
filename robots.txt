@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# AI crawlers welcome — free at the point of access
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://letmetellyouastory.org/sitemap.xml
