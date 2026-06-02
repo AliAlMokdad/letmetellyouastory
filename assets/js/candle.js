@@ -28,6 +28,7 @@ async function boot() {
   const THREE = await withTimeout(import("/assets/js/three.module.js"), 6000);
 
   const lowPower = window.innerWidth < 760 || (navigator.hardwareConcurrency || 8) <= 4 || window.devicePixelRatio > 2.5;
+  const lift = lowPower ? 1.0 : 0;   // raise the candle on phones so the flame crowns and the wax clears the title
   const burn = (window.LTYS && typeof LTYS.progress === "function") ? LTYS.progress() * 0.7 : 0;
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !lowPower, powerPreference: "high-performance" });
@@ -40,13 +41,14 @@ async function boot() {
 
   scene.add(new THREE.AmbientLight(0x2a2118, 0.6));
   const flameLight = new THREE.PointLight(0xffb066, 6, 9, 2);
-  flameLight.position.set(0, 0.55 - burn, 0.35);
+  flameLight.position.set(0, 0.55 - burn + lift, 0.35);
   scene.add(flameLight);
   const rim = new THREE.DirectionalLight(0x6688cc, 0.15); rim.position.set(-2, 1, -2); scene.add(rim);
 
   const group = new THREE.Group();
   scene.add(group);
-  if (lowPower) camera.position.z = 6.6;   // smaller candle on phones so it never impales the title
+  if (lowPower) camera.position.z = 6.6;   // smaller candle on phones
+  group.position.y = lift;                 // and raised so it crowns the title instead of impaling it
 
   const waxMat = new THREE.MeshStandardMaterial({ color: 0xb9a87f, roughness: 0.78, emissive: 0x3a2a14, emissiveIntensity: 0.12 });
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 1.7, 48, 1), waxMat);

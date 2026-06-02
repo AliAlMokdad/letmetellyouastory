@@ -1,5 +1,6 @@
 # letmetellyouastory.org — Apache/LiteSpeed
 DirectoryIndex index.html index.htm
+Options -Indexes
 <IfModule mod_brotli.c>
   AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/javascript application/javascript application/json image/svg+xml text/plain application/xml
 </IfModule>
@@ -16,6 +17,7 @@ DirectoryIndex index.html index.htm
   <FilesMatch "(sitemap\.xml|robots\.txt|llms\.txt|llms-full\.txt)$">
     Header set Cache-Control "public, max-age=3600"
   </FilesMatch>
+  Header unset X-Powered-By
   Header set X-Content-Type-Options "nosniff"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set X-Frame-Options "SAMEORIGIN"

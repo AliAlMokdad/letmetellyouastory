@@ -42,6 +42,13 @@
     for (var i = 0; i < n; i++) amb.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.1 + 0.25, p: Math.random() * 6.28, s: 0.4 + Math.random() });
   }
   function resize() {
+    if (!desktop.matches) {                 // phones show the readable list, not the canvas
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      canvas.style.display = "none";
+      place();
+      return;
+    }
+    canvas.style.display = "";
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = wrap.clientWidth; H = wrap.clientHeight;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
@@ -68,7 +75,7 @@
     }
     if (!reduced && onScreen) rafId = requestAnimationFrame(draw);
   }
-  function kick() { if (!reduced && onScreen && rafId == null) { t0 = null; rafId = requestAnimationFrame(draw); } }
+  function kick() { if (!reduced && desktop.matches && onScreen && rafId == null) { t0 = null; rafId = requestAnimationFrame(draw); } }
 
   window.addEventListener("resize", resize);
   (desktop.addEventListener ? desktop.addEventListener("change", resize) : desktop.addListener(resize));

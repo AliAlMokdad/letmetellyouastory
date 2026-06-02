@@ -162,7 +162,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.04; l
 .hero-sub { font-family: var(--serif); font-style: italic; font-size: clamp(1.05rem, 2.4vw, 1.4rem); color: var(--text); max-width: 40ch; margin: 1.8rem auto 0; line-height: 1.6; text-shadow: 0 1px 18px rgba(6,5,4,0.9); }
 .hero-dateline { display: block; margin-top: 1.5rem; }
 .hero-cta { margin-top: 2.4rem; }
-.hero-scroll { grid-row: 3; align-self: end; justify-self: center; padding-bottom: 2rem; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-faint); display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+.hero-scroll { grid-row: 3; align-self: end; justify-self: center; padding-bottom: 2rem; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-dim); text-shadow: 0 1px 12px rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
 .hero-scroll .dot { width: 1px; height: 38px; background: linear-gradient(180deg, var(--gold), transparent); animation: fall 2.4s var(--ease) infinite; }
 @keyframes fall { 0%{transform:scaleY(0);transform-origin:top} 45%{transform:scaleY(1);transform-origin:top} 55%{transform:scaleY(1);transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
 
@@ -339,7 +339,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.04; l
 /* --------------------------------------------------------- reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; transition-delay: 0s !important; animation-delay: 0s !important; }
   .grain, .cf-flame, .cf-glow, .hero-scroll .dot, .wick-flame, .embers i, .lights i { animation: none !important; }
   [data-reveal] { opacity: 1 !important; transform: none !important; }
   .embers { display: none; }
@@ -350,12 +350,12 @@ h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.04; l
   .nav { position: fixed; inset: 0 0 0 auto; width: min(78vw, 320px); background: rgba(10,8,7,0.97); flex-direction: column; justify-content: center; gap: 2rem; transform: translateX(100%); transition: transform 0.6s var(--ease); z-index: 60; }
   .nav.open { transform: none; }
   .nav a { font-size: 0.9rem; }
-  .nav-toggle { display: block; z-index: 70; width: 26px; height: 18px; position: relative; }
-  .nav-toggle span { position: absolute; left: 0; width: 100%; height: 1.5px; background: var(--gold); transition: 0.4s var(--ease); }
-  .nav-toggle span:nth-child(1){ top: 0; } .nav-toggle span:nth-child(2){ top: 8px; } .nav-toggle span:nth-child(3){ top: 16px; }
-  .nav-toggle.open span:nth-child(1){ top: 8px; transform: rotate(45deg); }
+  .nav-toggle { display: block; z-index: 70; width: 44px; height: 44px; padding: 13px 9px; box-sizing: border-box; position: relative; }
+  .nav-toggle span { position: absolute; left: 9px; width: 26px; height: 1.5px; background: var(--gold); transition: 0.4s var(--ease); }
+  .nav-toggle span:nth-child(1){ top: 14px; } .nav-toggle span:nth-child(2){ top: 22px; } .nav-toggle span:nth-child(3){ top: 30px; }
+  .nav-toggle.open span:nth-child(1){ top: 22px; transform: rotate(45deg); }
   .nav-toggle.open span:nth-child(2){ opacity: 0; }
-  .nav-toggle.open span:nth-child(3){ top: 8px; transform: rotate(-45deg); }
+  .nav-toggle.open span:nth-child(3){ top: 22px; transform: rotate(-45deg); }
   .triptych { grid-template-columns: 1fr; gap: 2.5rem; }
   .part-row { grid-template-columns: 3rem 1fr; }
   .part-count { display: none; }
@@ -366,4 +366,6 @@ h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.04; l
   .wick-flame { display: none; }
   .lt-node { grid-template-columns: 3.6rem 1fr; }
   .lt-min { display: none; }
+  .hero { grid-template-rows: 2.4fr auto 0.4fr; }
+  .candle-fallback { top: 34%; transform: translate(-50%, -100%); width: 88px; height: 188px; }
 }

@@ -17,14 +17,19 @@
     ticking = false;
     var top = window.scrollY + article.getBoundingClientRect().top;
     var span = article.offsetHeight - window.innerHeight;
-    var p = span > 0 ? (window.scrollY - top) / span : 1;
+    var p = span > 0 ? (window.scrollY - top) / span : 1;   // wick shows full when the whole letter fits
     p = Math.min(1, Math.max(0, p));
     root.style.setProperty("--read", p.toFixed(3));
-    if (!marked && p > 0.9 && slug && window.LTYS) { window.LTYS.markRead(slug); marked = true; }
+    // only mark read on a genuine scroll-to-end; short (non-scrollable) letters use the dwell timer below
+    if (!marked && span > 0 && p > 0.9 && slug && window.LTYS) { window.LTYS.markRead(slug); marked = true; }
   }
   function onScrollOrResize() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
 
   window.addEventListener("scroll", onScrollOrResize, { passive: true });
   window.addEventListener("resize", onScrollOrResize, { passive: true });
   update();
+  // a letter that fits entirely on screen can't be scrolled — mark it read after a short dwell, not on load
+  if (slug && window.LTYS && (article.offsetHeight - window.innerHeight) <= 0) {
+    setTimeout(function () { if (!marked) { window.LTYS.markRead(slug); marked = true; } }, 7000);
+  }
 })();
