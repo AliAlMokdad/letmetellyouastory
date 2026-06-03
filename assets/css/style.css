@@ -17,11 +17,11 @@
 
   --gold:       #d8b072;
   --gold-soft:  #c8a878;
-  --gold-bright:#ffe6b0;
+  --gold-bright:#f3d9a6;        /* softened from #ffe6b0 — candle-gold without halation on dark */
   --ember:      #ff8a3d;
   --ember-deep: #c0451d;
 
-  --text:       #f4ece0;
+  --text:       #e8e0d2;        /* softened warm off-white (15:1, ~2x AAA) — less glare for long reading on dark */
   --text-dim:   #dcd2c0;        /* brighter secondary text — clearer */
   --text-faint: #c6baa1;        /* brighter tertiary — readable at small sizes */
 
@@ -29,7 +29,7 @@
   --serif:   "EB Garamond", Georgia, "Times New Roman", serif;
   --mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --measure: 36rem;
+  --measure: 40rem;
   --gutter: clamp(1.25rem, 4vw, 3rem);
   --section: clamp(4.5rem, 12vh, 9rem);
 
@@ -49,7 +49,7 @@ body {
   background: var(--ink);
   color: var(--text);
   line-height: 1.72;
-  font-size: clamp(1.12rem, 0.7vw + 1.02rem, 1.32rem);
+  font-size: clamp(1.12rem, 0.55vw + 1.04rem, 1.27rem);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-variant-numeric: oldstyle-nums proportional-nums;   /* letterpress figures on the serif */
@@ -171,7 +171,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .hero-sub { font-family: var(--serif); font-style: italic; font-size: clamp(1.05rem, 2.4vw, 1.4rem); color: var(--text); max-width: 40ch; margin: 1.8rem auto 0; line-height: 1.6; text-shadow: 0 1px 18px rgba(6,5,4,0.9); }
 .hero-dateline { display: block; margin-top: 1.5rem; }
 .hero-cta { margin-top: 2.4rem; }
-.hero-scroll { grid-row: 3; align-self: end; justify-self: center; padding-bottom: 2rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); text-shadow: 0 1px 12px rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+.hero-scroll { grid-row: 3; align-self: end; justify-self: center; padding-bottom: 2rem; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); text-shadow: 0 1px 12px rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
 .hero-scroll .dot { width: 1px; height: 38px; background: linear-gradient(180deg, var(--gold), transparent); animation: fall 2.4s var(--ease) infinite; }
 @keyframes fall { 0%{transform:scaleY(0);transform-origin:top} 45%{transform:scaleY(1);transform-origin:top} 55%{transform:scaleY(1);transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
 
@@ -235,7 +235,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .lt-node:hover::before { border-color: var(--gold); box-shadow: 0 0 14px 3px rgba(255,180,90,0.55); }
 .lt-node.read::before { background: var(--gold); border-color: var(--gold-bright); box-shadow: 0 0 12px 3px rgba(255,180,90,0.6); }
 .lt-date { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.1em; color: var(--gold-soft); text-transform: uppercase; padding-top: 0.35rem; }
-.lt-titles .lt-letter { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); display: block; }
+.lt-titles .lt-letter { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); display: block; }
 .lt-titles .lt-theme { font-family: var(--display); font-size: clamp(1.15rem, 2.4vw, 1.5rem); color: var(--text); }
 .lt-node:hover .lt-theme { color: var(--gold-bright); }
 .lt-min { font-family: var(--mono); font-size: 0.68rem; color: var(--text-faint); letter-spacing: 0.08em; white-space: nowrap; padding-top: 0.4rem; }
@@ -253,12 +253,12 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .diary-plate .eyebrow { padding-left: 0; }
 .diary-plate .sep { color: var(--line); }
 .letter-title { font-family: var(--display); font-size: clamp(2.2rem, 6vw, 3.8rem); text-align: center; line-height: 1.02; }
-.letter-byline { text-align: center; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); margin-top: 0.85rem; }
+.letter-byline { text-align: center; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); margin-top: 0.85rem; }
 .letter-byline a { color: var(--gold-soft); border-bottom: 1px solid var(--line-soft); transition: color 0.3s; }
 .letter-byline a:hover { color: var(--gold-bright); }
 .letter-sub { text-align: center; color: var(--text-faint); font-style: italic; margin-top: 0.6rem; }
 .salutation { font-family: var(--display); font-style: italic; font-size: 1.5rem; color: var(--gold-bright); margin: 2.4rem 0 1.4rem; }
-.letter-body { font-size: 1.05em; line-height: 1.78; }   /* larger, airier for long-form reading */
+.letter-body { font-size: 1.05em; line-height: 1.75; }   /* larger, airier for long-form reading */
 .letter-body > p { margin-bottom: 1.4em; }
 .letter-body > p + p { text-indent: 1.15em; }
 .letter-body .rule-orn + p { text-indent: 0; }   /* each movement restarts flush */
@@ -270,7 +270,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 
 .letter-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 3.5rem; border-top: 1px solid var(--line-soft); padding-top: 2rem; }
 .letter-nav a { display: block; transition: color 0.4s var(--ease); }
-.letter-nav .ln-dir { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); display: block; margin-bottom: 0.4rem; }
+.letter-nav .ln-dir { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); display: block; margin-bottom: 0.4rem; }
 .letter-nav .ln-title { font-family: var(--display); font-size: 1.22rem; color: var(--text-dim); }
 .letter-nav a:hover .ln-title { color: var(--gold-bright); }
 .letter-nav .ln-next { text-align: right; }
@@ -291,7 +291,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .star { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.95rem; border: 1px solid var(--line-soft); border-radius: 100px; background: rgba(13,10,8,0.5); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); transition: all 0.45s var(--ease); }
 .star .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ember-deep); transition: all 0.45s var(--ease); }
 .star .st-theme { font-family: var(--display); font-size: 1.14rem; color: var(--text-dim); }
-.star .st-date { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.14em; color: var(--text-faint); text-transform: uppercase; }
+.star .st-date { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.14em; color: var(--text-faint); text-transform: uppercase; }
 .star:hover { border-color: var(--gold); background: rgba(34,22,12,0.6); transform: translateY(-2px); }
 .star:hover .dot { background: var(--gold-bright); box-shadow: 0 0 12px 3px rgba(255,180,90,0.7); }
 .star:hover .st-theme { color: var(--gold-bright); }
@@ -332,7 +332,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .al:hover .al-ic { color: var(--gold-bright); }
 .al-tx { display: flex; flex-direction: column; line-height: 1.25; }
 .al-lb { font-family: var(--serif); font-size: 1.04rem; color: var(--text); }
-.al-sb { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-top: 0.25rem; }
+.al-sb { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-top: 0.25rem; }
 .portrait { max-width: 23rem; margin: 0 auto clamp(2.2rem, 5vh, 3.5rem); text-align: center; position: relative; }
 .portrait img {
   width: 100%; height: auto; display: block; border-radius: 0;
