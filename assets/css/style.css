@@ -29,7 +29,7 @@
   --serif:   "EB Garamond", Georgia, "Times New Roman", serif;
   --mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --measure: 34rem;
+  --measure: 36rem;
   --gutter: clamp(1.25rem, 4vw, 3rem);
   --section: clamp(4.5rem, 12vh, 9rem);
 
@@ -52,6 +52,7 @@ body {
   font-size: clamp(1.05rem, 0.6vw + 1rem, 1.22rem);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-variant-numeric: oldstyle-nums proportional-nums;   /* letterpress figures on the serif */
   overflow-x: clip;
   min-height: 100vh;
 }
@@ -109,6 +110,13 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.04; letter-spacing: 0.005em; }
 .display { font-family: var(--display); font-weight: 500; font-size: clamp(3.4rem, 12vw, 11rem); line-height: 0.95; letter-spacing: -0.01em; }
 .serif-italic { font-style: italic; }
+
+/* literary polish: widow/orphan control, display-type kerning/ligatures, and
+   lining figures kept on the mono labels (old-style only on the serif body) */
+h1, h2, h3, .display, .hero-title, .manifesto p, .about-quote, .lt-epigraph, .letter-title, .inscription, .salutation { text-wrap: balance; }
+.letter-body > p, .about-body p, .hero-sub, .lt-note, .tri p { text-wrap: pretty; }
+h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { font-kerning: normal; font-feature-settings: "kern" 1, "liga" 1, "dlig" 1; }
+.meta, .eyebrow, .nav a, .brand-name, .lt-date, .lt-min, .ln-dir, .part-count, .foot-fine, .foot-links a, .star .st-date, .pc-role { font-variant-numeric: normal; }
 
 .eyebrow { font-family: var(--mono); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.42em; text-transform: uppercase; color: var(--gold); padding-left: 0.42em; }
 .meta { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); }
@@ -237,7 +245,8 @@ h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.04; l
 .letter-sub { text-align: center; color: var(--text-faint); font-style: italic; margin-top: 0.6rem; }
 .salutation { font-family: var(--display); font-style: italic; font-size: 1.5rem; color: var(--gold-bright); margin: 2.4rem 0 1.4rem; }
 .letter-body > p { margin-bottom: 1.35em; }
-.letter-body > p + p { text-indent: 1.4em; }
+.letter-body > p + p { text-indent: 1.15em; }
+.letter-body .rule-orn + p { text-indent: 0; }   /* each movement restarts flush */
 .letter-body .farewell { font-style: italic; color: var(--text-dim); text-indent: 0; margin-top: 1.8em; }
 .letter-body .signature { text-align: right; font-family: var(--display); font-style: italic; font-size: 1.6rem; color: var(--gold-bright); text-indent: 0; margin-top: 0.8em; letter-spacing: 0.02em; }
 .letter-body .signature::before { content: ""; display: block; width: 4rem; height: 1px; background: linear-gradient(90deg, transparent, var(--line)); margin: 0 0 0.85rem auto; }
@@ -295,7 +304,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.04; l
 .about-hero .about-kicker { display: block; margin-bottom: 1.4rem; }
 .about-body { max-width: var(--measure); margin: 0 auto; padding: var(--section) var(--gutter); }
 .about-body p { margin-bottom: 1.3em; }
-.about-body p + p { text-indent: 1.4em; }
+.about-body p + p { text-indent: 1.15em; }
 .about-body a { color: var(--gold); border-bottom: 1px solid var(--line); transition: color 0.3s; }
 .about-body a:hover { color: var(--gold-bright); }
 .portrait { max-width: 23rem; margin: 0 auto clamp(2.2rem, 5vh, 3.5rem); text-align: center; position: relative; }

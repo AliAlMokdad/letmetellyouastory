@@ -43,6 +43,8 @@ window.LTYS = (function () {
   if (!bloom) return;
   var navigating = false;
   document.addEventListener("click", function (e) {
+    // let modified / non-left clicks behave natively (Ctrl/Cmd/Shift/Alt/middle-click = open in new tab)
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (navigating) { e.preventDefault(); return; }   // debounce: one navigation at a time
     var a = e.target.closest ? e.target.closest('a[href]') : null;
     if (!a) return;

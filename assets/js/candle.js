@@ -25,7 +25,7 @@ if (!canvas || reduced || !hasWebGL()) {
 }
 
 async function boot() {
-  const THREE = await withTimeout(import("/assets/js/three.module.js"), 6000);
+  const THREE = await withTimeout(import("/assets/js/three.module.js?v=160m"), 6000);
 
   const lowPower = window.innerWidth < 760 || (navigator.hardwareConcurrency || 8) <= 4 || window.devicePixelRatio > 2.5;
   const lift = lowPower ? 1.0 : 0;   // raise the candle on phones so the flame crowns and the wax clears the title

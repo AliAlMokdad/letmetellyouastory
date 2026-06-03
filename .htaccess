@@ -18,6 +18,7 @@ Options -Indexes
     Header set Cache-Control "public, max-age=3600"
   </FilesMatch>
   Header unset X-Powered-By
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
   Header set X-Content-Type-Options "nosniff"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set X-Frame-Options "SAMEORIGIN"
