@@ -158,8 +158,10 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .hero { position: relative; min-height: 100svh; display: grid; grid-template-rows: 1.95fr auto 0.42fr; align-items: center; text-align: center; isolation: isolate; }
 #candle-canvas { position: absolute; inset: 0 0 auto 0; z-index: -1; width: 100%; height: 80%; display: block;
   -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); mask-image: linear-gradient(180deg, #000 60%, transparent); }
-.candle-fallback { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -86%); z-index: -1; width: 110px; height: 240px; display: block; }
-.webgl-on .candle-fallback { display: none; }
+/* fallback candle is HIDDEN by default so it never flashes behind the WebGL flame
+   during three.js load; it only appears when WebGL/motion is genuinely unavailable */
+.candle-fallback { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -86%); z-index: -1; width: 110px; height: 240px; display: none; }
+.no-webgl .candle-fallback, .reduced .candle-fallback { display: block; }
 .no-webgl #candle-canvas, .reduced #candle-canvas { display: none; }
 
 .hero-inner { grid-row: 2; padding-inline: var(--gutter); }
@@ -200,6 +202,12 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .part-title { font-family: var(--display); font-size: clamp(1.4rem, 3vw, 2rem); }
 .part-blurb { display: block; font-family: var(--serif); font-style: italic; color: var(--text-faint); font-size: 1.02rem; margin-top: 0.2rem; }
 .part-count { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.16em; color: var(--text-faint); text-transform: uppercase; }
+
+/* faint candlelit still-life — a writer's desk emerging from the dark near the foot of the page */
+.scene-band { position: relative; height: clamp(150px, 24vh, 270px); margin-top: clamp(1rem, 5vh, 3.5rem); overflow: hidden; pointer-events: none; }
+.scene-band svg { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: min(720px, 92vw); height: auto; display: block;
+  fill: var(--gold-soft); opacity: 0.1; filter: blur(0.6px);
+  -webkit-mask-image: radial-gradient(120% 130% at 50% 116%, #000 30%, transparent 70%); mask-image: radial-gradient(120% 130% at 50% 116%, #000 30%, transparent 70%); }
 
 /* ============================================================ THE LETTERS (timeline) */
 .lt-head { text-align: center; padding-top: clamp(7rem, 14vh, 10rem); }
