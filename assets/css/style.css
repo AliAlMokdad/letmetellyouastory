@@ -182,9 +182,13 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .manifesto .meta { margin-top: 1.2rem; }
 
 /* triptych: past / present / future (labels are NOT headings — fixes heading order) */
-.triptych { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); margin-top: 1rem; }
-.tri { text-align: center; padding-top: 2.4rem; position: relative; }
-.tri::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 14px 3px rgba(255,138,61,0.5); }
+.triptych { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); margin-top: 2.2rem; position: relative; }
+.triptych::before { content: ""; position: absolute; top: 28px; left: 13%; right: 13%; height: 1px; background: linear-gradient(90deg, transparent, var(--line) 16%, var(--line) 84%, transparent); z-index: 0; }   /* the light that travels: past -> present -> future */
+.tri { text-align: center; position: relative; z-index: 1; }
+.tri-icon { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; margin: 0 auto 1.1rem; color: var(--gold); background: radial-gradient(circle, var(--ink) 52%, transparent 78%); }
+.tri-icon svg { width: 28px; height: 28px; filter: drop-shadow(0 0 8px rgba(255,138,61,0.4)); }
+.tri-now { color: var(--gold-bright); }
+.tri-now svg { filter: drop-shadow(0 0 13px rgba(255,150,70,0.75)); }
 .tri-label { font-family: var(--display); font-size: 1.5rem; color: var(--gold); margin-bottom: 0.5rem; font-style: italic; }
 .tri p { color: var(--text-dim); font-size: 1.06rem; line-height: 1.62; }
 
@@ -316,8 +320,19 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .about-body { max-width: var(--measure); margin: 0 auto; padding: var(--section) var(--gutter); }
 .about-body p { margin-bottom: 1.3em; }
 .about-body p + p { text-indent: 1.15em; }
-.about-body a { color: var(--gold); border-bottom: 1px solid var(--line); transition: color 0.3s; }
-.about-body a:hover { color: var(--gold-bright); }
+.about-body p a { color: var(--gold); border-bottom: 1px solid var(--line); transition: color 0.3s; }
+.about-body p a:hover { color: var(--gold-bright); }
+
+/* iconed "find me elsewhere" link cards */
+.about-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(212px, 1fr)); gap: 0.7rem; margin: 2.2rem 0 0; }
+.al { display: flex; align-items: center; gap: 0.9rem; padding: 0.85rem 1rem; border: 1px solid var(--line-soft); border-radius: 5px; background: rgba(13,10,8,0.4); transition: border-color 0.4s var(--ease), background 0.4s var(--ease), transform 0.4s var(--ease); }
+.al:hover { border-color: rgba(216,176,114,0.5); background: rgba(34,22,12,0.5); transform: translateY(-2px); }
+.al-ic { flex: none; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; color: var(--gold); }
+.al-ic svg { width: 22px; height: 22px; }
+.al:hover .al-ic { color: var(--gold-bright); }
+.al-tx { display: flex; flex-direction: column; line-height: 1.25; }
+.al-lb { font-family: var(--serif); font-size: 1.04rem; color: var(--text); }
+.al-sb { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-top: 0.25rem; }
 .portrait { max-width: 23rem; margin: 0 auto clamp(2.2rem, 5vh, 3.5rem); text-align: center; position: relative; }
 .portrait img {
   width: 100%; height: auto; display: block; border-radius: 0;
@@ -377,6 +392,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
   .nav-toggle.open span:nth-child(2){ opacity: 0; }
   .nav-toggle.open span:nth-child(3){ top: 22px; transform: rotate(-45deg); }
   .triptych { grid-template-columns: 1fr; gap: 2.5rem; }
+  .triptych::before { display: none; }
   .part-row { grid-template-columns: 3rem 1fr; }
   .part-count { display: none; }
   /* reading: wick becomes a top hairline */
