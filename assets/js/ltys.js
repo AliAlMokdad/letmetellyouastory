@@ -2,7 +2,6 @@
    ltys.js — the shared light. (classic script, defer)
    ONE candle you burn down with a stranger: read-state persists in localStorage
    and is shared by the home candle, the timeline nodes, and the constellation.
-   Also: the "carry the candle over" page-transition bloom.
    ========================================================================== */
 window.LTYS = (function () {
   "use strict";
@@ -33,35 +32,6 @@ window.LTYS = (function () {
   }
 
   return { isRead: isRead, markRead: markRead, count: count, progress: progress, total: TOTAL, applyStates: applyStates };
-})();
-
-/* page-transition bloom — the flame swells and carries you to the next page */
-(function () {
-  "use strict";
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  var bloom = document.querySelector(".bloom");
-  if (!bloom) return;
-  var navigating = false;
-  document.addEventListener("click", function (e) {
-    // let modified / non-left clicks behave natively (Ctrl/Cmd/Shift/Alt/middle-click = open in new tab)
-    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    if (navigating) { e.preventDefault(); return; }   // debounce: one navigation at a time
-    var a = e.target.closest ? e.target.closest('a[href]') : null;
-    if (!a) return;
-    if (a.target === "_blank" || a.hasAttribute("data-no-bloom") || a.hasAttribute("download")) return;
-    var href = a.getAttribute("href");
-    if (!href || href.charAt(0) === "#") return;
-    var url;
-    try { url = new URL(a.href, location.href); } catch (_) { return; }
-    if (url.origin !== location.origin) return;
-    if (url.pathname === location.pathname) return; // same-page anchor
-    e.preventDefault();
-    navigating = true;
-    bloom.classList.add("on");
-    setTimeout(function () { location.href = a.href; }, 380);
-  });
-  // clear bloom + re-arm when arriving via back/forward cache
-  window.addEventListener("pageshow", function () { navigating = false; bloom.classList.remove("on"); });
 })();
 
 /* apply read-state once the DOM is ready */

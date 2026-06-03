@@ -94,12 +94,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   40%{transform:translate(2%,-2%)} 60%{transform:translate(-2%,-2%)} 80%{transform:translate(2%,1%)}
 }
 
-/* page-transition bloom (the candle "carries you over") */
-.bloom {
-  position: fixed; inset: 0; z-index: 150; pointer-events: none; opacity: 0;
-  background: radial-gradient(circle at 50% 60%, rgba(255,170,90,0.9), rgba(255,120,50,0.4) 35%, rgba(8,6,5,0) 72%);
-}
-.bloom.on { opacity: 1; transition: opacity 0.45s var(--ease); }
 
 /* ------------------------------------------------------------- layout */
 .wrap { width: 100%; max-width: 72rem; margin-inline: auto; padding-inline: var(--gutter); }
@@ -153,6 +147,11 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .btn:hover .arrow { transform: translateX(4px); }
 .btn-ghost { border-color: transparent; background: transparent; box-shadow: none; padding-inline: 0.4rem; }
 .btn-ghost:hover { background: transparent; box-shadow: none; }
+
+/* download / offline band (letters page) */
+.offline-band { text-align: center; padding-block: clamp(2.5rem, 7vh, 5rem) 0; }
+.offline-band .eyebrow { display: block; margin-bottom: 1rem; }
+.offline-note { font-family: var(--serif); font-style: italic; color: var(--text-dim); max-width: 38ch; margin: 0 auto 2rem; line-height: 1.62; }
 
 /* ============================================================ HOME / hero */
 .hero { position: relative; min-height: 100svh; display: grid; grid-template-rows: 1.95fr auto 0.42fr; align-items: center; text-align: center; isolation: isolate; }
@@ -250,6 +249,9 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .diary-plate .eyebrow { padding-left: 0; }
 .diary-plate .sep { color: var(--line); }
 .letter-title { font-family: var(--display); font-size: clamp(2.2rem, 6vw, 3.8rem); text-align: center; line-height: 1.02; }
+.letter-byline { text-align: center; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); margin-top: 0.85rem; }
+.letter-byline a { color: var(--gold-soft); border-bottom: 1px solid var(--line-soft); transition: color 0.3s; }
+.letter-byline a:hover { color: var(--gold-bright); }
 .letter-sub { text-align: center; color: var(--text-faint); font-style: italic; margin-top: 0.6rem; }
 .salutation { font-family: var(--display); font-style: italic; font-size: 1.5rem; color: var(--gold-bright); margin: 2.4rem 0 1.4rem; }
 .letter-body { font-size: 1.05em; line-height: 1.78; }   /* larger, airier for long-form reading */

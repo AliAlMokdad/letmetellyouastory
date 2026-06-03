@@ -1,6 +1,8 @@
 # letmetellyouastory.org — Apache/LiteSpeed
 DirectoryIndex index.html index.htm
 Options -Indexes
+AddType application/epub+zip .epub
+AddType application/manifest+json .webmanifest
 <IfModule mod_brotli.c>
   AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/javascript application/javascript application/json image/svg+xml text/plain application/xml
 </IfModule>
@@ -17,6 +19,12 @@ Options -Indexes
   <FilesMatch "(sitemap\.xml|robots\.txt|llms\.txt|llms-full\.txt)$">
     Header set Cache-Control "public, max-age=3600"
   </FilesMatch>
+  <Files "sw.js">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </Files>
+  <Files "manifest.webmanifest">
+    Header set Cache-Control "public, max-age=86400"
+  </Files>
   Header unset X-Powered-By
   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
   Header set X-Content-Type-Options "nosniff"
