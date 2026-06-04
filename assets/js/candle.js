@@ -39,7 +39,7 @@ async function boot() {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  camera.position.set(0, 0.95, 5.4);
+  camera.position.set(0, 0.95, 5.2);
 
   scene.add(new THREE.AmbientLight(0x2a2118, 0.6));
   const flameLight = new THREE.PointLight(0xffb066, 6, 9, 2);
@@ -53,7 +53,7 @@ async function boot() {
   // title instead of impaling it — recomputed in resize().
   function frame() {
     lift = isShort() ? 0.4 : (isPhone() ? 1.0 : 0);   // gentler lift in landscape so the flame never flies off-top
-    camera.position.z = isPhone() ? 6.6 : 5.4;        // smaller candle on phones
+    camera.position.z = isPhone() ? 6.6 : 5.2;        // smaller candle on phones
     group.position.y = lift;
     flameLight.position.y = 0.55 - burn + lift;       // keep the key light married to the flame
   }
@@ -82,13 +82,13 @@ async function boot() {
       void main(){
         vec2 p=vUv; float t=p.y; float cx=p.x-0.5;
         float n=fbm(vec2(p.x*2.0, p.y*3.6 - uTime*1.7));
-        cx += (n-0.5)*0.11*smoothstep(0.04,1.0,t);
+        cx += (n-0.5)*0.09*smoothstep(0.04,1.0,t);
         float base=smoothstep(0.0,0.07,t);
         float swell=1.0+0.35*(1.0-smoothstep(0.0,0.55,t))*smoothstep(0.0,0.22,t); // gentle belly low-down
         float taper=pow(max(1.0-t,0.0),1.25);
         float w=0.33*base*taper*swell; float d=abs(cx)/max(w,0.001);
-        float flame=1.0-smoothstep(0.45,0.92,d);
-        float core=1.0-smoothstep(0.0,0.70,d);
+        float flame=1.0-smoothstep(0.50,0.85,d);
+        float core=1.0-smoothstep(0.0,0.73,d);
         float heat=clamp(core*(1.0-t*0.55)+(1.0-t)*0.25,0.0,1.0);
         vec3 col=mix(vec3(0.80,0.16,0.03),vec3(1.0,0.48,0.12),smoothstep(0.12,0.42,heat));
         col=mix(col,vec3(1.0,0.80,0.36),smoothstep(0.40,0.78,heat));
@@ -99,7 +99,7 @@ async function boot() {
         gl_FragColor=vec4(col*(0.6+heat*0.85), a);
       }`,
   });
-  const flame = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 1.7), flameMat);
+  const flame = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.8), flameMat);
   flame.position.y = 0.55 - burn; group.add(flame);
 
   function makeGlow(size, powv, mul, colorHex, zoff) {
@@ -115,8 +115,8 @@ async function boot() {
     return { mesh, u };
   }
   // wide soft room bloom + tight bright core halo = layered candlelight
-  const glowWide = makeGlow(lowPower ? 3.2 : 3.8, 2.2, 0.30, 0xff8a3a, -0.22);
-  const glowCore = makeGlow(1.7, 3.6, 0.34, 0xffb673, -0.12);
+  const glowWide = makeGlow(lowPower ? 3.2 : 3.8, 2.2, 0.32, 0xff9440, -0.22);
+  const glowCore = makeGlow(1.9, 3.2, 0.40, 0xffc488, -0.12);
 
   function dotTexture() {
     const s = 64, c = document.createElement("canvas"); c.width = c.height = s;
