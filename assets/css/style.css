@@ -155,7 +155,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .offline-note { font-family: var(--serif); font-style: italic; color: var(--text-dim); max-width: 38ch; margin: 0 auto 2rem; line-height: 1.62; }
 
 /* ============================================================ HOME / hero */
-.hero { position: relative; min-height: 100svh; display: grid; grid-template-rows: 1.6fr auto 0.6fr; align-items: center; text-align: center; isolation: isolate; }
+.hero { position: relative; min-height: 100svh; display: grid; grid-template-rows: 1.5fr auto 0.42fr; align-items: center; text-align: center; isolation: isolate; }
 #candle-canvas { position: absolute; inset: 0 0 auto 0; z-index: -1; width: 100%; height: 80%; display: block;
   -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); mask-image: linear-gradient(180deg, #000 60%, transparent); }
 /* fallback candle is HIDDEN by default so it never flashes behind the WebGL flame
@@ -397,12 +397,13 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .inscription .ornament-floret { display: block; margin-bottom: 1.4rem; }
 
 /* --------------------------------------------------------------- footer */
-.site-foot { border-top: 1px solid var(--line-soft); padding-block: clamp(4rem, 12vh, 7rem) 2.5rem; margin-top: clamp(2rem, 8vh, 6rem); background: linear-gradient(180deg, transparent, rgba(7,6,5,0.5)); text-align: center; color: var(--text-faint); }
-.site-foot .ornament-floret { margin-bottom: 1.4rem; }
-.foot-links { display: flex; gap: 1.6rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.6rem; }
+.site-foot { border-top: 1px solid var(--line-soft); padding-block: clamp(2.4rem, 5vh, 3.4rem) 2.6rem; text-align: center; color: var(--text-faint); }
+.site-foot .ornament-floret { margin-bottom: 1rem; }
+.foot-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.4rem; }
 .foot-links a { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); transition: color 0.4s; }
 .foot-links a:hover { color: var(--gold-bright); }
-.foot-fine { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; color: var(--text-faint); line-height: 2; }
+.foot-line { font-family: var(--serif); font-style: italic; font-size: 1.02rem; color: var(--text-faint); max-width: 44ch; margin: 0 auto 1.3rem; line-height: 1.65; }
+.foot-fine { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.16em; color: var(--text-faint); opacity: 0.72; }
 
 /* --------------------------------------------------------- reveal motion */
 [data-reveal] { opacity: 0; transform: translateY(26px); transition: opacity 1.1s var(--ease), transform 1.1s var(--ease); }
@@ -448,7 +449,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
   .wick-flame { display: none; }
   .lt-node { grid-template-columns: 3.6rem 1fr; }
   .lt-min { display: none; }
-  .hero { grid-template-rows: 1.9fr auto 0.6fr; }
+  .hero { grid-template-rows: 1.8fr auto 0.4fr; }
   .hero-dateline { display: none; }   /* phone: drop the "candlelight / 20+ countries / dates" line */
   #candle-canvas { height: 72%; -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent); mask-image: linear-gradient(180deg, #000 50%, transparent); }
   .candle-fallback { top: 34%; transform: translate(-50%, -100%); width: 88px; height: 188px; }
