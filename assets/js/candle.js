@@ -59,7 +59,7 @@ async function boot() {
   }
   frame();
 
-  const waxMat = new THREE.MeshStandardMaterial({ color: 0xb9a87f, roughness: 0.78, emissive: 0x3a2a14, emissiveIntensity: 0.12 });
+  const waxMat = new THREE.MeshStandardMaterial({ color: 0xb9a87f, roughness: 0.78, emissive: 0x46301a, emissiveIntensity: 0.15 });
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 1.7, 48, 1), waxMat);
   body.position.y = -1.15; group.add(body);
   const pool = new THREE.Mesh(new THREE.CircleGeometry(0.33, 40), new THREE.MeshStandardMaterial({ color: 0x9a8157, roughness: 0.62, emissive: 0x4a3214, emissiveIntensity: 0.15 }));
@@ -93,7 +93,7 @@ async function boot() {
         vec3 col=mix(vec3(0.80,0.16,0.03),vec3(1.0,0.48,0.12),smoothstep(0.12,0.42,heat));
         col=mix(col,vec3(1.0,0.80,0.36),smoothstep(0.40,0.78,heat));
         col=mix(col,vec3(1.0,0.93,0.78),smoothstep(0.86,0.99,heat));
-        col=mix(col,vec3(0.38,0.50,0.95),smoothstep(0.0,0.04,t)*(1.0-smoothstep(0.04,0.12,t))*0.7*core);
+        col=mix(col,vec3(0.38,0.50,0.95),smoothstep(0.0,0.04,t)*(1.0-smoothstep(0.05,0.16,t))*0.7*core);
         float a=flame*uFlick; a*=smoothstep(1.0,0.65,t)*0.6+0.4;
         if(a<0.004) discard;
         gl_FragColor=vec4(col*(0.6+heat*0.85), a);
@@ -108,7 +108,10 @@ async function boot() {
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: u,
       vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `,
       fragmentShader: `varying vec2 vUv; uniform float uFlick; uniform vec3 uColor; uniform float uPow; uniform float uMul;
-        void main(){ float dd=distance(vUv,vec2(0.5)); float a=pow(1.0-clamp(dd*2.0,0.0,1.0),uPow); gl_FragColor=vec4(uColor, a*uMul*uFlick);} `,
+        float dither(vec2 c){ return fract(sin(dot(c, vec2(12.9898,78.233)))*43758.5453); }
+        void main(){ float dd=distance(vUv,vec2(0.5)); float a=pow(1.0-clamp(dd*2.0,0.0,1.0),uPow);
+          a += (dither(gl_FragCoord.xy)-0.5)*0.012;   // break 8-bit banding on the soft falloff
+          gl_FragColor=vec4(uColor, max(a,0.0)*uMul*uFlick);} `,
     });
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(size, size), m);
     mesh.position.set(0, 0.55 - burn, zoff); group.add(mesh);
@@ -165,13 +168,13 @@ async function boot() {
 
   let gust = 0, gustT = 0;
   function flicker(t) {
-    const v = 0.87
-      + 0.050*Math.sin(t*1.3)          // slow drift — the "breath"
-      + 0.038*Math.sin(t*7.0 + 1.1)    // mid
-      + 0.024*Math.sin(t*19.0 + 0.6)   // fine
-      + 0.012*Math.sin(t*41.0 + 2.3);  // shimmer
-    if (t > gustT) { gust = Math.random() < 0.18 ? Math.random()*0.18 : 0; gustT = t + 0.35 + Math.random()*1.4; }
-    return Math.max(0.58, v - gust - draft * 0.3);
+    const v = 0.88
+      + 0.052*Math.sin(t*1.15)         // slow drift — the "breath" (a touch slower/calmer)
+      + 0.034*Math.sin(t*6.2 + 1.1)    // mid
+      + 0.016*Math.sin(t*17.0 + 0.6)   // fine (softened — a still indoor candle, not a draughty one)
+      + 0.007*Math.sin(t*38.0 + 2.3);  // shimmer (softened)
+    if (t > gustT) { gust = Math.random() < 0.13 ? Math.random()*0.14 : 0; gustT = t + 0.5 + Math.random()*1.8; }
+    return Math.max(0.6, v - gust - draft * 0.3);
   }
 
   const clock = new THREE.Clock();
