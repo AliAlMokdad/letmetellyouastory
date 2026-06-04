@@ -28,7 +28,9 @@ async function boot() {
   const THREE = await withTimeout(import("/assets/js/three.module.js?v=160m"), 6000);
 
   const lowPower = window.innerWidth < 760 || (navigator.hardwareConcurrency || 8) <= 4 || window.devicePixelRatio > 2.5;
-  const lift = lowPower ? 1.0 : 0;   // raise the candle on phones so the flame crowns and the wax clears the title
+  const isPhone = () => window.innerWidth <= 720;    // match the CSS breakpoint exactly
+  const isShort = () => window.innerHeight <= 600;   // landscape phones / short windows
+  let lift = isPhone() ? 1.0 : 0;   // raise the candle on phones so the flame crowns and the wax clears the title
   const burn = (window.LTYS && typeof LTYS.progress === "function") ? LTYS.progress() * 0.7 : 0;
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !lowPower, powerPreference: "high-performance" });
@@ -47,8 +49,15 @@ async function boot() {
 
   const group = new THREE.Group();
   scene.add(group);
-  if (lowPower) camera.position.z = 6.6;   // smaller candle on phones
-  group.position.y = lift;                 // and raised so it crowns the title instead of impaling it
+  // Framing reacts to viewport (orientation/resize) so the flame always crowns the
+  // title instead of impaling it — recomputed in resize().
+  function frame() {
+    lift = isShort() ? 0.4 : (isPhone() ? 1.0 : 0);   // gentler lift in landscape so the flame never flies off-top
+    camera.position.z = isPhone() ? 6.6 : 5.4;        // smaller candle on phones
+    group.position.y = lift;
+    flameLight.position.y = 0.55 - burn + lift;       // keep the key light married to the flame
+  }
+  frame();
 
   const waxMat = new THREE.MeshStandardMaterial({ color: 0xb9a87f, roughness: 0.78, emissive: 0x3a2a14, emissiveIntensity: 0.12 });
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 1.7, 48, 1), waxMat);
@@ -74,15 +83,17 @@ async function boot() {
         vec2 p=vUv; float t=p.y; float cx=p.x-0.5;
         float n=fbm(vec2(p.x*2.0, p.y*3.6 - uTime*1.7));
         cx += (n-0.5)*0.11*smoothstep(0.04,1.0,t);
-        float base=smoothstep(0.0,0.10,t); float taper=pow(max(1.0-t,0.0),0.60);
-        float w=0.34*base*taper; float d=abs(cx)/max(w,0.001);
-        float flame=1.0-smoothstep(0.55,1.05,d);
-        float core=1.0-smoothstep(0.0,0.6,d);
+        float base=smoothstep(0.0,0.07,t);
+        float swell=1.0+0.35*(1.0-smoothstep(0.0,0.55,t))*smoothstep(0.0,0.22,t); // gentle belly low-down
+        float taper=pow(max(1.0-t,0.0),1.25);
+        float w=0.33*base*taper*swell; float d=abs(cx)/max(w,0.001);
+        float flame=1.0-smoothstep(0.45,0.92,d);
+        float core=1.0-smoothstep(0.0,0.70,d);
         float heat=clamp(core*(1.0-t*0.55)+(1.0-t)*0.25,0.0,1.0);
-        vec3 col=mix(vec3(0.75,0.12,0.03),vec3(1.0,0.45,0.12),smoothstep(0.15,0.45,heat));
-        col=mix(col,vec3(1.0,0.78,0.34),smoothstep(0.45,0.72,heat));
-        col=mix(col,vec3(1.0,0.96,0.85),smoothstep(0.72,0.95,heat));
-        col=mix(col,vec3(0.4,0.55,0.95),smoothstep(0.0,0.05,t)*(1.0-smoothstep(0.05,0.13,t))*0.6*core);
+        vec3 col=mix(vec3(0.80,0.16,0.03),vec3(1.0,0.48,0.12),smoothstep(0.12,0.42,heat));
+        col=mix(col,vec3(1.0,0.80,0.36),smoothstep(0.40,0.78,heat));
+        col=mix(col,vec3(1.0,0.93,0.78),smoothstep(0.86,0.99,heat));
+        col=mix(col,vec3(0.38,0.50,0.95),smoothstep(0.0,0.04,t)*(1.0-smoothstep(0.04,0.12,t))*0.7*core);
         float a=flame*uFlick; a*=smoothstep(1.0,0.65,t)*0.6+0.4;
         if(a<0.004) discard;
         gl_FragColor=vec4(col*(0.6+heat*0.85), a);
@@ -91,15 +102,21 @@ async function boot() {
   const flame = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 1.7), flameMat);
   flame.position.y = 0.55 - burn; group.add(flame);
 
-  const glowUniforms = { uFlick: { value: 1 }, uColor: { value: new THREE.Color(0xff9a4a) } };
-  const glowMat = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: glowUniforms,
-    vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `,
-    fragmentShader: `varying vec2 vUv; uniform float uFlick; uniform vec3 uColor;
-      void main(){ float dd=distance(vUv,vec2(0.5)); float a=pow(1.0-clamp(dd*2.0,0.0,1.0),2.6); gl_FragColor=vec4(uColor, a*0.42*uFlick);} `,
-  });
-  const glow = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 3.1), glowMat);
-  glow.position.set(0, 0.55 - burn, -0.2); group.add(glow);
+  function makeGlow(size, powv, mul, colorHex, zoff) {
+    const u = { uFlick: { value: 1 }, uColor: { value: new THREE.Color(colorHex) }, uPow: { value: powv }, uMul: { value: mul } };
+    const m = new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: u,
+      vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `,
+      fragmentShader: `varying vec2 vUv; uniform float uFlick; uniform vec3 uColor; uniform float uPow; uniform float uMul;
+        void main(){ float dd=distance(vUv,vec2(0.5)); float a=pow(1.0-clamp(dd*2.0,0.0,1.0),uPow); gl_FragColor=vec4(uColor, a*uMul*uFlick);} `,
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(size, size), m);
+    mesh.position.set(0, 0.55 - burn, zoff); group.add(mesh);
+    return { mesh, u };
+  }
+  // wide soft room bloom + tight bright core halo = layered candlelight
+  const glowWide = makeGlow(lowPower ? 3.2 : 3.8, 2.2, 0.30, 0xff8a3a, -0.22);
+  const glowCore = makeGlow(1.7, 3.6, 0.34, 0xffb673, -0.12);
 
   function dotTexture() {
     const s = 64, c = document.createElement("canvas"); c.width = c.height = s;
@@ -116,7 +133,7 @@ async function boot() {
       sway: 0.05+Math.random()*0.12, phase: Math.random()*6.28, life: fresh ? Math.random() : 0, max: 1.6+Math.random()*1.8 };
   }
   for (let i = 0; i < EMB; i++) seedEmber(i, true);
-  const embMat = new THREE.PointsMaterial({ size: lowPower ? 0.07 : 0.055, map: sprite, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, color: 0xff9a44 });
+  const embMat = new THREE.PointsMaterial({ size: lowPower ? 0.05 : 0.055, map: sprite, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, color: 0xff9a44 });
   const embGeo = new THREE.BufferGeometry(); embGeo.setAttribute("position", new THREE.BufferAttribute(embPos, 3));
   const embers = new THREE.Points(embGeo, embMat); group.add(embers);
 
@@ -142,14 +159,19 @@ async function boot() {
   function resize() {
     const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+    frame();   // re-derive lift / zoom on orientation + resize
   }
   const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
 
   let gust = 0, gustT = 0;
   function flicker(t) {
-    const v = 0.86 + 0.06*Math.sin(t*11.3) + 0.04*Math.sin(t*23.7+1.2) + 0.03*Math.sin(t*5.1+0.6);
-    if (t > gustT) { gust = Math.random() < 0.25 ? Math.random()*0.22 : 0; gustT = t + 0.2 + Math.random()*0.9; }
-    return Math.max(0.55, v - gust - draft * 0.3);
+    const v = 0.87
+      + 0.050*Math.sin(t*1.3)          // slow drift — the "breath"
+      + 0.038*Math.sin(t*7.0 + 1.1)    // mid
+      + 0.024*Math.sin(t*19.0 + 0.6)   // fine
+      + 0.012*Math.sin(t*41.0 + 2.3);  // shimmer
+    if (t > gustT) { gust = Math.random() < 0.18 ? Math.random()*0.18 : 0; gustT = t + 0.35 + Math.random()*1.4; }
+    return Math.max(0.58, v - gust - draft * 0.3);
   }
 
   const clock = new THREE.Clock();
@@ -157,14 +179,15 @@ async function boot() {
   // by the browser's rAF suspension, so an explicit document.hidden gate would
   // wrongly block even the first synchronous render in a backgrounded tab.
   let rafId = null, onScreen = true;
-  function activeNow() { return onScreen; }
+  function activeNow() { return onScreen && !document.hidden; }
   function loop() {
     rafId = null; if (!activeNow()) return; rafId = requestAnimationFrame(loop);
     const t = clock.getElapsedTime();
     draft *= 0.94; if (performance.now() - lastMove > 1200) draft *= 0.9;
     const f = flicker(t);
     flameUniforms.uTime.value = t; flameUniforms.uFlick.value = f;
-    glowUniforms.uFlick.value = 0.7 + f * 0.5;
+    glowCore.u.uFlick.value = 0.7 + f * 0.5;
+    glowWide.u.uFlick.value = 0.55 + f * 0.4;   // the wide bloom breathes a touch less
     flameLight.intensity = 3.4 + f * 2.6; flameLight.position.x = (f - 0.85) * 0.25;
     flame.scale.x = 0.92 + f * 0.12;
 
@@ -186,12 +209,13 @@ async function boot() {
     camera.position.y += (0.95 + target.y - camera.position.y) * 0.04;
     camera.lookAt(0, 0.10, 0);
     flame.lookAt(camera.position.x, flame.position.y, camera.position.z);
-    glow.lookAt(camera.position.x, glow.position.y, camera.position.z);
+    glowCore.mesh.lookAt(camera.position.x, glowCore.mesh.position.y, camera.position.z);
+    glowWide.mesh.lookAt(camera.position.x, glowWide.mesh.position.y, camera.position.z);
     renderer.render(scene, camera);
   }
   function kick() { if (activeNow() && rafId === null) loop(); }
 
-  document.addEventListener("visibilitychange", () => { kick(); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) kick(); });
   if ("IntersectionObserver" in window) {
     new IntersectionObserver((es) => { onScreen = es[0].isIntersecting; kick(); }, { threshold: 0 }).observe(canvas);
   }

@@ -7,6 +7,8 @@
   "use strict";
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduced) document.documentElement.classList.add("reduced");
+  /* entrance animations are opt-in via a class so no-JS keeps text fully visible */
+  if (!reduced) document.documentElement.classList.add("anim");
 
   /* header background after scroll */
   var head = document.querySelector(".site-head");
@@ -88,5 +90,29 @@
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("/sw.js").catch(function () {});
     });
+  }
+
+  /* lumen: a travelling light carries you between pages (outgoing warm wipe).
+     Fail-safe by design — the overlay is always pointer-events:none, navigation
+     has a timeout fallback, and reduced-motion / no-JS fall back to a plain link. */
+  var lumen = document.querySelector(".lumen");
+  if (lumen) {
+    var resetLumen = function () { lumen.className = "lumen"; };
+    window.addEventListener("pageshow", function (ev) { if (ev.persisted) resetLumen(); }); // clear any stuck overlay on bfcache restore
+    if (!reduced) {
+      document.addEventListener("click", function (e) {
+        var a = e.target.closest ? e.target.closest("a[href]") : null;
+        if (!a || a.target === "_blank" || a.hasAttribute("download")) return;
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        var url; try { url = new URL(a.getAttribute("href"), location.href); } catch (_) { return; }
+        if (url.origin !== location.origin) return;     // external link: let it open normally
+        if (url.pathname === location.pathname) return;  // same page / hash anchor: no transition
+        e.preventDefault();
+        var done = false, go = function () { if (done) return; done = true; location.href = a.href; };
+        lumen.classList.add("out");
+        lumen.addEventListener("animationend", go, { once: true });
+        setTimeout(go, 720);  // fail-safe: navigate even if animationend never fires
+      });
+    }
   }
 })();
