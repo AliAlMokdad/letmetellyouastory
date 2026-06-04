@@ -283,6 +283,8 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 @keyframes rise { 0%{ transform: translateY(0) translateX(0); opacity:0 } 12%{opacity:0.7} 88%{opacity:0.5} 100%{ transform: translateY(-104vh) translateX(18px); opacity:0 } }
 
 /* ============================================================ THE INDEX (constellation) */
+.index-mobile-note { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.1rem; min-height: 56vh; padding: 0 var(--gutter); }
+.index-mobile-note .ornament-floret { color: var(--gold); font-size: 1.5rem; }
 .sky-head { text-align: center; padding-top: clamp(7rem, 14vh, 10rem); }
 .sky-wrap { position: relative; max-width: 70rem; margin: clamp(2rem,6vh,4rem) auto 0; padding: 0 var(--gutter) var(--section); }
 .sky-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
@@ -404,4 +406,8 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
   .lt-min { display: none; }
   .hero { grid-template-rows: 2.4fr auto 0.4fr; }
   .candle-fallback { top: 34%; transform: translate(-50%, -100%); width: 88px; height: 188px; }
+  /* Index is desktop-only: hide its nav link + the constellation; show the phone note */
+  .nav-desktop-only { display: none !important; }
+  .sky-head, .sky-wrap { display: none; }
+  .index-mobile-note { display: flex; }
 }
