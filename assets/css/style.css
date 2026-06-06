@@ -165,12 +165,12 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .no-webgl #candle-canvas, .reduced #candle-canvas { display: none; }
 
 .hero-inner { grid-row: 2; padding-inline: var(--gutter); }
-.hero .eyebrow { display: block; margin-bottom: 1.05rem; text-shadow: 0 1px 14px rgba(0,0,0,0.6); }
-.hero-title { margin: 0 auto; max-width: 15ch; line-height: 1.0; text-shadow: 0 2px 26px rgba(0,0,0,0.5); }
+.hero .eyebrow { display: block; margin-bottom: 1.05rem; text-shadow: 0 0 5px rgba(0,0,0,0.88), 0 1px 14px rgba(0,0,0,0.6); }
+.hero-title { margin: 0 auto; max-width: 15ch; line-height: 1.0; text-shadow: 0 0 8px rgba(0,0,0,0.92), 0 0 20px rgba(0,0,0,0.68), 0 2px 30px rgba(0,0,0,0.55); }
 .hero-title .line { display: block; }
 .hero-title .line:first-child { letter-spacing: -0.012em; }
-.hero-title .line.serif-italic { color: var(--gold-bright); font-size: 1.16em; letter-spacing: 0.014em; margin-top: 0.08em; text-shadow: 0 2px 30px rgba(255,150,70,0.18), 0 2px 26px rgba(0,0,0,0.55); }
-.hero-sub { font-family: var(--serif); font-style: italic; font-size: clamp(1.04rem, 2.3vw, 1.34rem); color: var(--text); opacity: 0.9; max-width: 35ch; margin: 2.3rem auto 0; line-height: 1.62; text-shadow: 0 1px 18px rgba(6,5,4,0.9); }
+.hero-title .line.serif-italic { color: var(--gold-bright); font-size: 1.16em; letter-spacing: 0.014em; margin-top: 0.08em; text-shadow: 0 0 8px rgba(0,0,0,0.92), 0 0 20px rgba(0,0,0,0.7), 0 2px 30px rgba(255,150,70,0.16), 0 2px 26px rgba(0,0,0,0.6); }
+.hero-sub { font-family: var(--serif); font-style: italic; font-size: clamp(1.04rem, 2.3vw, 1.34rem); color: var(--text); opacity: 0.9; max-width: 35ch; margin: 2.3rem auto 0; line-height: 1.62; text-shadow: 0 0 6px rgba(6,5,4,0.95), 0 1px 18px rgba(6,5,4,0.9); }
 .hero-cta { margin-top: 2.9rem; }
 .hero-cta .btn { box-shadow: none; border-color: rgba(216,176,114,0.26); background: rgba(12,9,7,0.34); }
 .hero-scroll { grid-row: 3; align-self: end; justify-self: center; padding-bottom: max(2rem, calc(1rem + env(safe-area-inset-bottom))); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); text-shadow: 0 1px 12px rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
@@ -421,10 +421,26 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 [data-reveal][data-delay="3"] { transition-delay: 0.36s; }
 
 /* --------------------------------------------------------- CSS fallback candle */
-.cf-glow { position: absolute; left: 50%; top: 6px; transform: translateX(-50%); width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(255,225,180,0.55) 4%, rgba(255,170,80,0.42) 22%, rgba(255,120,50,0.12) 48%, transparent 72%); filter: blur(7px); }
-.cf-body { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 54px; height: 170px; border-radius: 6px 6px 3px 3px; background: linear-gradient(180deg, #f0e2c4, #cdba93 35%, #a8906a); box-shadow: inset -10px 0 18px rgba(0,0,0,0.3), inset 8px 0 14px rgba(255,255,255,0.18); }
-.cf-flame { position: absolute; left: 50%; top: 36px; transform: translateX(-50%); width: 22px; height: 62px; border-radius: 50% 50% 50% 50% / 78% 78% 38% 38%; background: radial-gradient(ellipse at 50% 72%, #fff 3%, #ffe7bd 12%, var(--gold-bright) 26%, var(--ember) 58%, var(--ember-deep) 86%, transparent 96%); transform-origin: 50% 92%; animation: flicker 3.4s ease-in-out infinite; box-shadow: 0 -2px 26px rgba(255,140,60,0.55), 0 -1px 10px rgba(255,200,120,0.6); }
+.cf-glow { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); width: 230px; height: 264px; border-radius: 50%;
+  background: radial-gradient(60% 52% at 50% 38%, rgba(255,228,184,0.50) 2%, rgba(255,176,92,0.40) 24%, rgba(255,120,50,0.12) 52%, transparent 74%); filter: blur(8px); }
+.cf-body { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 54px; height: 170px; border-radius: 6px 6px 3px 3px;
+  background: radial-gradient(120% 60% at 50% 0%, rgba(255,170,90,0.45), transparent 60%), linear-gradient(180deg, #f0e2c4, #cdba93 35%, #a8906a);
+  box-shadow: inset -10px 0 18px rgba(0,0,0,0.3), inset 8px 0 14px rgba(255,255,255,0.18), 0 0 22px rgba(255,150,70,0.18); }
+.cf-flame { position: absolute; left: 50%; top: 34px; transform: translateX(-50%); width: 24px; height: 66px; transform-origin: 50% 92%;
+  border-radius: 50% 50% 50% 50% / 78% 78% 38% 38%;
+  background: radial-gradient(ellipse at 50% 74%, #ffe7bd 8%, var(--gold-bright) 24%, var(--ember) 56%, var(--ember-deep) 84%, transparent 95%);
+  box-shadow: 0 -2px 26px rgba(255,140,60,0.5), 0 -1px 10px rgba(255,200,120,0.5); animation: cf-flicker 3.4s ease-in-out infinite; }
+.cf-flame::before { content: ""; position: absolute; left: 50%; top: 30%; transform: translateX(-50%); width: 52%; height: 52%;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: radial-gradient(ellipse at 50% 38%, #fff7e6 0%, #ffd89a 45%, transparent 78%); filter: blur(0.5px); opacity: 0.92; }
+.cf-flame::after { content: ""; position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); width: 30%; height: 22%; border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 60%, rgba(120,150,255,0.55), transparent 75%); }
 @keyframes flicker { 0%,100%{transform:translateX(-50%) scale(1) rotate(-1deg)} 25%{transform:translateX(-51%) scale(1.04,0.97) rotate(1deg)} 50%{transform:translateX(-49%) scale(0.97,1.05) rotate(-1deg)} 75%{transform:translateX(-50%) scale(1.02,0.99) rotate(1deg)} }
+@keyframes cf-flicker {
+  0%,100%{ transform: translateX(-50%) scale(1) rotate(-1deg) }
+  30%{ transform: translateX(-50.5%) scale(1.03,0.98) rotate(1.4deg) }
+  55%{ transform: translateX(-49.5%) scale(0.98,1.04) rotate(-0.6deg) }
+  78%{ transform: translateX(-50%) scale(1.02,0.99) rotate(0.8deg) }
+}
 
 /* --------------------------------------------------------- reduced motion */
 @media (prefers-reduced-motion: reduce) {
