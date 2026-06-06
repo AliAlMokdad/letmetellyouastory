@@ -88,6 +88,27 @@
     });
   }
 
+  /* one-time note (letters page): the "short version" notice — show once, remember dismissal */
+  var note = document.querySelector(".note-toast");
+  if (note) {
+    var NKEY = "ltys_note_short_v1", noteSeen = null;
+    try { noteSeen = localStorage.getItem(NKEY); } catch (e) {}
+    if (!noteSeen) {
+      var noteEsc = function (e) { if (e.key === "Escape") hideNote(); };
+      var hideNote = function () {
+        note.classList.remove("in");
+        try { localStorage.setItem(NKEY, "1"); } catch (e) {}
+        document.removeEventListener("keydown", noteEsc);
+        setTimeout(function () { note.setAttribute("hidden", ""); }, 700);
+      };
+      note.removeAttribute("hidden");
+      setTimeout(function () { note.classList.add("in"); }, 1400);
+      var nx = note.querySelector(".note-x");
+      if (nx) nx.addEventListener("click", hideNote);
+      document.addEventListener("keydown", noteEsc);
+    }
+  }
+
   /* lumen: a travelling light carries you between pages (outgoing warm wipe).
      Fail-safe by design — the overlay is always pointer-events:none, navigation
      has a timeout fallback, and reduced-motion / no-JS fall back to a plain link. */
