@@ -165,13 +165,14 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .no-webgl #candle-canvas, .reduced #candle-canvas { display: none; }
 
 .hero-inner { grid-row: 2; padding-inline: var(--gutter); }
-.hero .eyebrow { display: block; margin-bottom: 1.05rem; text-shadow: 0 0 5px rgba(0,0,0,0.88), 0 1px 14px rgba(0,0,0,0.6); }
+.hero .eyebrow { display: block; margin: 2.4rem 0 0; text-shadow: 0 0 5px rgba(0,0,0,0.88), 0 1px 14px rgba(0,0,0,0.6); }   /* moved below the dedication, just above the CTA */
 .hero-title { margin: 0 auto; max-width: 15ch; line-height: 1.0; text-shadow: 0 0 8px rgba(0,0,0,0.92), 0 0 20px rgba(0,0,0,0.68), 0 2px 30px rgba(0,0,0,0.55); }
 .hero-title .line { display: block; }
 .hero-title .line:first-child { letter-spacing: -0.012em; }
 .hero-title .line.serif-italic { color: var(--gold-bright); font-size: 1.16em; letter-spacing: 0.014em; margin-top: 0.08em; text-shadow: 0 0 8px rgba(0,0,0,0.92), 0 0 20px rgba(0,0,0,0.7), 0 2px 30px rgba(255,150,70,0.16), 0 2px 26px rgba(0,0,0,0.6); }
 .hero-sub { font-family: var(--serif); font-style: italic; font-size: clamp(1.04rem, 2.3vw, 1.34rem); color: var(--text); opacity: 0.9; max-width: 35ch; margin: 2.3rem auto 0; line-height: 1.62; text-shadow: 0 0 6px rgba(6,5,4,0.95), 0 1px 18px rgba(6,5,4,0.9); }
 .hero-cta { margin-top: 2.9rem; }
+.hero-inner .hero-cta { margin-top: 1.15rem; }   /* the moved eyebrow sits just on top of the CTA on home (home-only) */
 .hero-cta .btn { box-shadow: none; border-color: rgba(216,176,114,0.26); background: rgba(12,9,7,0.34); }
 .hero-scroll { grid-row: 3; align-self: end; justify-self: center; padding-bottom: max(2rem, calc(1rem + env(safe-area-inset-bottom))); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); text-shadow: 0 1px 12px rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
 .hero-scroll .dot { width: 1px; height: 38px; background: linear-gradient(180deg, var(--gold), transparent); animation: fall 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
@@ -194,7 +195,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .anim .hero-scroll { opacity: 0; }
 @keyframes rise-in { to { opacity: 1; transform: none; } }
 @keyframes fade-in { to { opacity: 1; } }
-.anim .hero-inner > .eyebrow { animation: rise-in 0.9s var(--ease) 0.30s forwards; }
+.anim .hero-inner > .eyebrow { animation: rise-in 0.9s var(--ease) 0.82s forwards; }   /* reveals after the dedication, with its new bottom position */
 .anim .hero-title            { animation: rise-in 1.1s var(--ease) 0.45s forwards; }
 .anim .hero-sub              { animation: rise-in 1.0s var(--ease) 0.72s forwards; }
 .anim .hero .hero-cta        { animation: rise-in 0.95s var(--ease) 0.92s forwards; }
@@ -489,7 +490,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
   #candle-canvas { height: 100%; }
   .hero-title .line { font-size: clamp(2rem, 8vh, 2.7rem); }
   .hero-title .line.serif-italic { font-size: 1.06em; }
-  .hero .eyebrow { margin-bottom: 0.6rem; }
+  .hero .eyebrow { margin: 1.2rem 0 0; }
   .hero-sub { margin-top: 0.9rem; font-size: clamp(0.95rem, 2.2vw, 1.1rem); max-width: 46ch; }
   .hero-cta { margin-top: 1.2rem; }
   .hero-scroll { display: none; }
