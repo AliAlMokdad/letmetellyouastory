@@ -2,8 +2,9 @@
    constellation.js — the Index as an actual night sky (Canvas2D + DOM stars).
    The 36 letters become scattered points of light, joined by the faint path
    the light travels through them in order. Labels appear on hover/focus.
-   Read letters are lit gold (ltys.js applyStates). On phones / reduced-motion
-   it falls back to the accessible, crawlable list of links (no positioning).
+   Read letters are lit gold (ltys.js applyStates). On phones, touch devices
+   (no hover), and reduced-motion it falls back to the accessible, crawlable
+   labelled list of links (no positioning).
    ========================================================================== */
 (function () {
   "use strict";
@@ -13,7 +14,9 @@
   if (!wrap || !canvas || !list) return;
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var desktop = window.matchMedia("(min-width: 721px)");
+  // scatter the sky only where the user can actually hover (mouse/trackpad).
+  // pure-touch devices (pointer: coarse) keep the readable labelled-pill list.
+  var desktop = window.matchMedia("(min-width: 721px) and (pointer: fine)");
   var stars = [].slice.call(list.querySelectorAll(".star"));
   var ctx = canvas.getContext("2d");
   var W = 0, H = 0, dpr = 1, pos = [], amb = [], rafId = null, t0 = null, onScreen = true;
