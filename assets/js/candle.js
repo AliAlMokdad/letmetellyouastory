@@ -229,12 +229,13 @@ async function boot() {
 
   // pointer: parallax + a "draft" (velocity) that makes the flame duck
   const target = { x: 0, y: 0 }; let lastPx = 0, lastPy = 0, draft = 0, lastMove = 0;
-  window.addEventListener("pointermove", (e) => {
+  const onPointerMove = (e) => {
     const nx = e.clientX / window.innerWidth, ny = e.clientY / window.innerHeight;
     target.x = (nx - 0.5) * 0.5; target.y = (ny - 0.5) * 0.3;
     draft = Math.min(1, draft + Math.hypot(nx - lastPx, ny - lastPy) * 6);
     lastPx = nx; lastPy = ny; lastMove = performance.now();
-  }, { passive: true });
+  };
+  window.addEventListener("pointermove", onPointerMove, { passive: true });
 
   let lastW = 0, lastH = 0, roT = null;
   function resize() {
@@ -288,7 +289,7 @@ async function boot() {
     pool.material.emissiveIntensity = 0.22 + 0.30 * f;
 
     for (let i = 0; i < EMB; i++) {
-      const e = embData[i]; e.life += 0.016 * e.speed;
+      const e = embData[i]; if (e.life <= e.max) e.life += 0.016 * e.speed;   // parked embers (life>max) stop integrating
       if (e.life > e.max) { if (f > 0.97 && Math.random() < 0.15) seedEmber(i, false); else { e.life = e.max + 999; } }
       embPos[i*3] = e.x0 + Math.sin(t*1.5+e.phase) * e.sway * (0.4 + e.life*0.5);
       embPos[i*3+1] = embBase + e.life * 0.9; embPos[i*3+2] = e.z;
@@ -315,10 +316,14 @@ async function boot() {
   function kick() { if (activeNow() && rafId === null) loop(); }
 
   document.addEventListener("visibilitychange", () => { if (!document.hidden) kick(); });
+  let io = null;
   if ("IntersectionObserver" in window) {
-    new IntersectionObserver((es) => { onScreen = es[0].isIntersecting; kick(); }, { threshold: 0 }).observe(canvas);
+    io = new IntersectionObserver((es) => { onScreen = es[0].isIntersecting; kick(); }, { threshold: 0 });
+    io.observe(canvas);
   }
-  canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); onScreen = false; if (rafId) { cancelAnimationFrame(rafId); rafId = null; } root.classList.add("no-webgl"); });
+  canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); onScreen = false; if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    window.removeEventListener("pointermove", onPointerMove); ro.disconnect(); if (io) io.disconnect();   // tear down listeners/observers when we fall back to CSS
+    root.classList.add("no-webgl"); });
 
   loop();
   root.classList.add("webgl-on");
