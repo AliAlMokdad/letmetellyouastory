@@ -163,6 +163,13 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .candle-fallback { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -86%); z-index: -1; width: 110px; height: 240px; display: none; }
 .no-webgl .candle-fallback, .reduced .candle-fallback { display: block; }
 .no-webgl #candle-canvas, .reduced #candle-canvas { display: none; }
+/* vintage vibe: a faint vignette (clear centre, gently darkened edges) + a warm pool at the
+   bottom, sitting BEHIND the candle canvas (z-index:-2 < -1) so it frames the dark surround and
+   can never wash the flame or dim the title. Static, so it is safe under prefers-reduced-motion. */
+.hero-vintage { position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(120% 95% at 50% 44%, transparent 58%, rgba(8,5,4,0.16) 82%, rgba(8,5,4,0.30) 100%),
+    radial-gradient(150% 78% at 50% 120%, rgba(150,96,42,0.085), transparent 56%); }
 
 .hero-inner { grid-row: 2; padding-inline: var(--gutter); }
 .hero .eyebrow { display: block; margin: 2.4rem 0 0; text-shadow: 0 0 5px rgba(0,0,0,0.88), 0 1px 14px rgba(0,0,0,0.6); }   /* moved below the dedication, just above the CTA */
