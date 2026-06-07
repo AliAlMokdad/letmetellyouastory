@@ -66,10 +66,10 @@ async function boot() {
 
   // wax body — translucent: the flame's light enters the top centimetre and re-emerges as a
   // warm internal glow, brightest at the lip, pulsing with the flame (onBeforeCompile SSS).
-  const waxMat = new THREE.MeshStandardMaterial({ color: 0xb9a87f, roughness: 0.82, metalness: 0.0, emissive: 0x000000, emissiveIntensity: 1.0 });
+  const waxMat = new THREE.MeshStandardMaterial({ color: 0xc8b890, roughness: 0.80, metalness: 0.0, emissive: 0x000000, emissiveIntensity: 1.0 });
   waxMat.onBeforeCompile = (sh) => {
     sh.uniforms.uFlick = waxFlick;
-    sh.uniforms.uWaxTopY = { value: 0.85 };   // local-space y of the cylinder top (height 1.7 => +0.85)
+    sh.uniforms.uWaxTopY = { value: 0.775 };   // local-space y of the cylinder top (height 1.55 => +0.775)
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\n varying vec3 vLocalPos;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\n vLocalPos = position;');
@@ -77,16 +77,16 @@ async function boot() {
       .replace('#include <common>', '#include <common>\n uniform float uFlick; uniform float uWaxTopY; varying vec3 vLocalPos;')
       .replace('#include <emissivemap_fragment>', `
         #include <emissivemap_fragment>
-        float waxDepth = clamp((uWaxTopY - vLocalPos.y) / 1.7, 0.0, 1.0);   // 0 at top, 1 at base
+        float waxDepth = clamp((uWaxTopY - vLocalPos.y) / 1.55, 0.0, 1.0);   // 0 at top, 1 at base
         float topGlow = pow(1.0 - waxDepth, 2.6);                           // bright lip, quick falloff
         float rimWrap = pow(1.0 - abs(dot(normalize(vViewPosition), vNormal)), 2.0);
-        vec3 waxCore = vec3(1.0, 0.50, 0.20);                               // deep warm transmitted color (NOT white)
+        vec3 waxCore = vec3(1.0, 0.55, 0.26);                               // warm amber transmitted color (vintage, NOT white)
         float waxGlow = (topGlow*0.85 + rimWrap*topGlow*0.6) * (0.55 + 0.45*uFlick);
         totalEmissiveRadiance += waxCore * waxGlow * 0.9;
       `);
   };
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 1.7, 48, 1), waxMat);
-  body.position.y = -1.15; group.add(body);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 1.55, 48, 1), waxMat);
+  body.position.y = -1.075; group.add(body);   // height 1.55, top stays at y=-0.30 so flame/wick/pool are unmoved
   const pool = new THREE.Mesh(new THREE.CircleGeometry(0.33, 48), new THREE.MeshStandardMaterial({ color: 0x6f5a39, roughness: 0.30, metalness: 0.0, emissive: 0x3a2510, emissiveIntensity: 0.22 }));
   pool.rotation.x = -Math.PI / 2; pool.position.y = -0.30 - burn; group.add(pool);
   const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.010, 0.018, 0.14, 8), new THREE.MeshBasicMaterial({ color: 0x140d08 }));
@@ -109,12 +109,15 @@ async function boot() {
         vec2 p=vUv; float t=p.y; float cx=p.x-0.5;
 
         // ---- motion: height-DELAYED sway so the tip leans/curls while the base stays planted ----
-        float sway = fbm(vec2(0.0, t*0.55 - p.y*1.6)) - 0.5;   // perturbation advects UP the flame
+        float sway = fbm(vec2(uTime*0.5, p.y*1.5 - uTime*0.9)) - 0.5;   // perturbation advects UP over TIME => the body actually undulates (flamy)
         float grade = smoothstep(0.06, 1.0, t);                // 0 at wick, 1 at tip
-        cx += sway * 0.085 * grade;                            // body lean
+        cx += sway * 0.085 * grade;                            // body lean (now animated; amplitude kept gentle so it stays "a bit")
         #ifndef LOWP
-          float tip = fbm(vec2(p.x*1.3, p.y*3.2 - uTime*2.1)) - 0.5;  // fine tip fray (desktop only)
-          cx += tip * 0.05 * grade * grade;
+          float tip = fbm(vec2(p.x*1.3, p.y*3.4 - uTime*2.4)) - 0.5;  // fine tip fray (desktop)
+          cx += tip * 0.06 * grade * grade;
+        #else
+          float tip = sin(p.y*7.0 - uTime*3.0) * 0.5;                 // phone: cheap analytic tip lick (1 sine, no extra octaves)
+          cx += tip * 0.045 * grade * grade;
         #endif
 
         // ---- silhouette: rounded shoulder (gaussian) + neck below the tip + soft taper ----
@@ -255,14 +258,15 @@ async function boot() {
 
   let gust = 0, gustTo = 0, gustT = 0, glowLag = 1;
   function flicker(t) {
-    let v = 0.90
-      + 0.060*Math.sin(t*1.10 + 1.7)   // primary breath ~1.1 Hz (dominant)
-      + 0.030*vn(t*0.45)               // sub-breath wander (non-periodic)
-      + 0.018*Math.sin(t*3.30 + 0.6)   // gentle secondary
+    let v = 0.88
+      + 0.075*Math.sin(t*1.25 + 1.7)   // primary breath ~1.25 Hz (dominant), a touch deeper
+      + 0.040*vn(t*0.55)               // sub-breath wander (non-periodic), livelier
+      + 0.024*Math.sin(t*3.30 + 0.6)   // gentle secondary
+      + 0.016*vn(t*2.4)                // mid wobble: flame-tongue liveliness, value-noise so it never strobes
       + 0.010*vn(t*5.0);               // fine shimmer via noise, not a high sine
     if (t > gustT) { gustTo = Math.random() < 0.16 ? Math.random()*0.12 : 0; gustT = t + 0.6 + Math.random()*2.2; }
     gust += (gustTo - gust) * 0.06;    // smooth toward target => flares ramp & recover, no step (no micro-strobe)
-    return Math.max(0.62, v - gust - draft*0.3);
+    return Math.max(0.60, v - gust - draft*0.3);
   }
 
   const clock = new THREE.Clock();
@@ -276,15 +280,15 @@ async function boot() {
     const t = clock.getElapsedTime();
     draft *= 0.94; if (performance.now() - lastMove > 1200) draft *= 0.9;
     const f = flicker(t);
-    const lean = Math.sin(t*0.5)*0.6;                 // slow lateral lean signal shared by the light + the flame
+    const lean = Math.sin(t*0.5)*0.55 + Math.sin(t*1.3 + 2.1)*0.22;   // two-rate lean: slow drift + a quicker sway (livelier, shared by light + flame)
     flameUniforms.uTime.value = t; flameUniforms.uFlick.value = f;
     glowLag += (f - glowLag) * 0.10;                  // the far-field throw lags the core (whole-plume inertia)
     glowCore.u.uFlick.value = 0.72 + f * 0.46;        // near core: steadier, tracks the current frame
     glowWide.u.uFlick.value = 0.50 + glowLag * 0.40;  // room throw: shimmers most, lags
     flameLight.intensity = 3.2 + f * 2.4;             // ceiling 5.6 — halation insurance
     flameLight.position.x = lean * 0.10;              // cast warmth tracks the visible lean, not the scalar
-    flame.scale.x = 0.92 + f * 0.12;
-    flame.scale.y = 0.99 + f * 0.05;                  // taller when brighter (the flame draws up as it flares)
+    flame.scale.x = 0.93 + f * 0.10;                  // slightly less width pumping => steadier silhouette
+    flame.scale.y = 0.98 + f * 0.09;                  // more vertical draw-up on flares (the flame reaches as it breathes)
     waxFlick.value = f;                               // wax internal glow pulses with the flame
     pool.material.emissiveIntensity = 0.22 + 0.30 * f;
 
