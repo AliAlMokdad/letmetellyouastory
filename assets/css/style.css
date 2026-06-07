@@ -488,6 +488,14 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
   .nav-desktop-only { display: none !important; }
   .sky-head, .sky-wrap { display: none; }
   .index-mobile-note { display: flex; }
+  /* HOME phone only: hide the faint scroll dot, let the footer rise gently into the dark
+     band below the CTA (it becomes the scroll cue), and compact the footer's own spacing.
+     Scoped to body.home so the letters/about/reading-page footers are untouched. */
+  .hero-scroll { display: none; }
+  body.home .site-foot { margin-top: -4vh; padding-block: 1.4rem 1.9rem; }
+  body.home .site-foot .ornament-floret { margin-bottom: 0.55rem; }
+  body.home .foot-line { margin-bottom: 0.8rem; font-size: 0.98rem; }
+  body.home .foot-aside { margin-bottom: 0.8rem; }
 }
 
 /* Landscape phones / very short viewports: cap the title to viewport-height so the
