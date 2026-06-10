@@ -28,8 +28,17 @@
   window.addEventListener("scroll", onScrollOrResize, { passive: true });
   window.addEventListener("resize", onScrollOrResize, { passive: true });
   update();
-  // a letter that fits entirely on screen can't be scrolled — mark it read after a short dwell, not on load
+  // a letter that fits entirely on screen can't be scrolled — mark it read after a short
+  // dwell of genuine presence. The timer only runs while the tab is visible: a letter
+  // opened in a background tab must not burn the candle for a reading that never happened.
   if (slug && window.LTYS && (article.offsetHeight - window.innerHeight) <= 0) {
-    setTimeout(function () { if (!marked) { window.LTYS.markRead(slug); marked = true; } }, 7000);
+    var dwell = null;
+    var arm = function () {
+      if (marked || dwell !== null || document.hidden) return;
+      dwell = setTimeout(function () { dwell = null; if (!marked) { window.LTYS.markRead(slug); marked = true; } }, 7000);
+    };
+    var disarm = function () { if (dwell !== null) { clearTimeout(dwell); dwell = null; } };
+    document.addEventListener("visibilitychange", function () { if (document.hidden) disarm(); else arm(); });
+    arm();
   }
 })();

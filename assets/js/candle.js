@@ -28,7 +28,7 @@ if (!canvas || reduced || !hasWebGL()) {
 }
 
 async function boot() {
-  const THREE = await withTimeout(import("/assets/js/three.module.js?v=160m"), 6000);
+  const THREE = await withTimeout(import("/assets/js/three.module.js?v=4d8e72af"), 6000);
 
   // lowPower uses min(w,h) so a phone booted in landscape still takes the cheap path
   const lowPower = Math.min(window.innerWidth, window.innerHeight) < 760 || (navigator.hardwareConcurrency || 8) <= 4 || window.devicePixelRatio > 2.5;
@@ -82,7 +82,8 @@ async function boot() {
         float rimWrap = pow(1.0 - abs(dot(normalize(vViewPosition), vNormal)), 2.0);
         vec3 waxCore = vec3(1.0, 0.55, 0.26);                               // warm amber transmitted color (vintage, NOT white)
         float waxGlow = (topGlow*0.85 + rimWrap*topGlow*0.6) * (0.55 + 0.45*uFlick);
-        totalEmissiveRadiance += waxCore * waxGlow * 0.9;
+        float wd = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233)))*43758.5453);   // dither: the slow amber ramp on a big dark surface is the scene's #1 banding risk
+        totalEmissiveRadiance += waxCore * waxGlow * 0.9 + (wd - 0.5) * 0.0045;
       `);
   };
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 1.55, 48, 1), waxMat);
@@ -91,6 +92,11 @@ async function boot() {
   pool.rotation.x = -Math.PI / 2; pool.position.y = -0.30 - burn; group.add(pool);
   const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.010, 0.018, 0.14, 8), new THREE.MeshBasicMaterial({ color: 0x140d08 }));
   wick.position.y = -0.235 - burn; group.add(wick);   // tuck the wick base into the dark inner cone
+  // incandescent wick tip — real wicks glow ember-orange where the flame eats them.
+  // A tiny additive seed inside the dark inner cone; pulses with the flicker.
+  const wickTip = new THREE.Mesh(new THREE.SphereGeometry(0.020, 8, 6),
+    new THREE.MeshBasicMaterial({ color: 0xff7a2e, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false }));
+  wickTip.position.y = -0.168 - burn; group.add(wickTip);
 
   const NOISE = (oct) => `
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
@@ -109,12 +115,12 @@ async function boot() {
         vec2 p=vUv; float t=p.y; float cx=p.x-0.5;
 
         // ---- motion: height-DELAYED sway so the tip leans/curls while the base stays planted ----
-        float sway = fbm(vec2(uTime*0.5, p.y*1.5 - uTime*0.9)) - 0.5;   // perturbation advects UP over TIME => the body actually undulates (flamy)
+        float sway = fbm(vec2(uTime*0.5, p.y*1.7 - uTime*1.25)) - 0.5;   // perturbation advects UP over TIME => the body actually undulates; hot gas rises faster than it sways
         float grade = smoothstep(0.06, 1.0, t);                // 0 at wick, 1 at tip
         cx += sway * 0.085 * grade;                            // body lean (now animated; amplitude kept gentle so it stays "a bit")
         #ifndef LOWP
           float tip = fbm(vec2(p.x*1.3, p.y*3.4 - uTime*2.4)) - 0.5;  // fine tip fray (desktop)
-          cx += tip * 0.06 * grade * grade;
+          cx += tip * 0.06 * (0.72 + 0.42*uFlick) * grade * grade;   // the tip frays more on bright flares, calms on dim beats
         #else
           float tip = sin(p.y*7.0 - uTime*3.0) * 0.5;                 // phone: cheap analytic tip lick (1 sine, no extra octaves)
           cx += tip * 0.045 * grade * grade;
@@ -147,7 +153,7 @@ async function boot() {
 
         // ---- blackbody-ish ramp: cool-red root -> orange -> amber -> warm-white core (never harsh white) ----
         vec3 col = vec3(0.62,0.11,0.02);                                 // deep cool red (tip / outer)
-        col = mix(col, vec3(0.85,0.26,0.05), smoothstep(0.10,0.34,T));   // red-orange
+        col = mix(col, vec3(0.85,0.26,0.05), smoothstep(0.08,0.36,T));   // red-orange (widened stop softens the most band-prone seam)
         col = mix(col, vec3(1.00,0.49,0.12), smoothstep(0.30,0.56,T));   // orange
         col = mix(col, vec3(1.00,0.72,0.30), smoothstep(0.52,0.78,T));   // amber-yellow
         col = mix(col, vec3(1.00,0.84,0.52), smoothstep(0.80,0.97,T));   // warm core kept amber (B well under R) -> no white halation
@@ -168,6 +174,7 @@ async function boot() {
 
         float b = 0.42 + T*0.70;                         // brightness from temperature (calmer peak so the core stays warm, not white)
         b = b / (1.0 + 0.50*max(b-1.0,0.0));             // firm Reinhard shoulder -> hot core ~1.06, no white halation
+        b += (hash(gl_FragCoord.xy*0.7) - 0.5) * 0.012;  // dither the additive ramp (no onion-ring banding over the black page)
         gl_FragColor = vec4(col*b, a);
       }`,
   });
@@ -220,10 +227,10 @@ async function boot() {
   const embGeo = new THREE.BufferGeometry(); embGeo.setAttribute("position", new THREE.BufferAttribute(embPos, 3));
   const embers = new THREE.Points(embGeo, embMat); group.add(embers);
 
-  const DUST = lowPower ? 60 : 130;
+  const DUST = lowPower ? 44 : 90;   // fewer motes, clustered nearer the warm updraft (cuts additive overdraw, reads truer)
   const dustPos = new Float32Array(DUST * 3), dustVel = [];
   for (let i = 0; i < DUST; i++) {
-    dustPos[i*3]=(Math.random()-0.5)*5; dustPos[i*3+1]=(Math.random()-0.5)*4; dustPos[i*3+2]=(Math.random()-0.5)*2.5;
+    dustPos[i*3]=(Math.random()-0.5)*4.2; dustPos[i*3+1]=(Math.random()-0.5)*4; dustPos[i*3+2]=(Math.random()-0.5)*2.5;
     dustVel.push({ x:(Math.random()-0.5)*0.02, y:(Math.random()-0.2)*0.02, p:Math.random()*6.28 });
   }
   const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute("position", new THREE.BufferAttribute(dustPos, 3));
@@ -262,8 +269,8 @@ async function boot() {
       + 0.075*Math.sin(t*1.25 + 1.7)   // primary breath ~1.25 Hz (dominant), a touch deeper
       + 0.040*vn(t*0.55)               // sub-breath wander (non-periodic), livelier
       + 0.024*Math.sin(t*3.30 + 0.6)   // gentle secondary
-      + 0.016*vn(t*2.4)                // mid wobble: flame-tongue liveliness, value-noise so it never strobes
-      + 0.010*vn(t*5.0);               // fine shimmer via noise, not a high sine
+      + (0.016*vn(t*2.4)               // mid wobble: flame-tongue liveliness, value-noise so it never strobes
+      +  0.010*vn(t*5.0)) * (1.0 + gust*2.5);   // fine shimmer; both tremble faster only while a draft disturbs the flame, then settle
     if (t > gustT) { gustTo = Math.random() < 0.16 ? Math.random()*0.12 : 0; gustT = t + 0.6 + Math.random()*2.2; }
     gust += (gustTo - gust) * 0.06;    // smooth toward target => flares ramp & recover, no step (no micro-strobe)
     return Math.max(0.60, v - gust - draft*0.3);
@@ -281,6 +288,10 @@ async function boot() {
     draft *= 0.94; if (performance.now() - lastMove > 1200) draft *= 0.9;
     const f = flicker(t);
     const lean = Math.sin(t*0.5)*0.55 + Math.sin(t*1.3 + 2.1)*0.22;   // two-rate lean: slow drift + a quicker sway (livelier, shared by light + flame)
+    if (lastMove === 0) {              // no pointer has ever moved (touch devices): a held-breath camera drift so phones never feel frozen
+      target.x = Math.sin(t*0.13)*0.06 + Math.sin(t*0.29 + 0.8)*0.025;
+      target.y = Math.sin(t*0.11 + 1.3)*0.035;
+    }
     flameUniforms.uTime.value = t; flameUniforms.uFlick.value = f;
     glowLag += (f - glowLag) * 0.10;                  // the far-field throw lags the core (whole-plume inertia)
     glowCore.u.uFlick.value = 0.72 + f * 0.46;        // near core: steadier, tracks the current frame
@@ -291,6 +302,8 @@ async function boot() {
     flame.scale.y = 0.98 + f * 0.09;                  // more vertical draw-up on flares (the flame reaches as it breathes)
     waxFlick.value = f;                               // wax internal glow pulses with the flame
     pool.material.emissiveIntensity = 0.22 + 0.30 * f;
+    wickTip.material.opacity = 0.30 + 0.40 * f;       // the ember seed breathes with the flame
+    wickTip.scale.setScalar(0.92 + f * 0.18);
 
     for (let i = 0; i < EMB; i++) {
       const e = embData[i]; if (e.life <= e.max) e.life += 0.016 * e.speed;   // parked embers (life>max) stop integrating
@@ -327,6 +340,7 @@ async function boot() {
   }
   canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); onScreen = false; if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     window.removeEventListener("pointermove", onPointerMove); ro.disconnect(); if (io) io.disconnect();   // tear down listeners/observers when we fall back to CSS
+    sprite.dispose(); renderer.dispose();   // release GPU-side handles too — we never come back from the CSS fallback
     root.classList.add("no-webgl"); });
 
   loop();

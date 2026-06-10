@@ -1,6 +1,6 @@
 # letmetellyouastory.org — Apache/LiteSpeed
 DirectoryIndex index.html index.htm
-Options -Indexes
+Options -Indexes -MultiViews
 AddType application/epub+zip .epub
 AddType application/manifest+json .webmanifest
 <IfModule mod_brotli.c>

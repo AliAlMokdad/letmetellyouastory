@@ -29,7 +29,7 @@
   --serif:   "EB Garamond", Georgia, "Times New Roman", serif;
   --mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --measure: 40rem;
+  --measure: 37rem;             /* ~66-70 characters per line at the reading size — the book-typography band */
   --gutter: clamp(1.25rem, 4vw, 3rem);
   --section: clamp(4.5rem, 12vh, 9rem);
 
@@ -42,7 +42,12 @@
 /* --------------------------------------------------------------- reset */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: rgba(216,176,114,0.26) transparent; }
+/* the scrollbar is on screen for the whole read — keep it in the candlelit field */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-thumb { background: rgba(216,176,114,0.22); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(216,176,114,0.4); border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }
 
 body {
   font-family: var(--serif);
@@ -54,13 +59,15 @@ body {
   text-rendering: optimizeLegibility;
   font-optical-sizing: auto;
   font-variant-numeric: oldstyle-nums proportional-nums;   /* letterpress figures on the serif */
+  hanging-punctuation: first last;   /* opening quotes hang into the margin where supported (Safari) — fine book setting for free */
   overflow-x: clip;
   min-height: 100vh;
 }
 img { max-width: 100%; display: block; height: auto; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
-::selection { background: rgba(216, 176, 114, 0.28); color: #fff; }
+::selection { background: rgba(216, 176, 114, 0.30); color: #faf3e6; }       /* warm, not pure white — same eye-comfort rule as the body text */
+::-moz-selection { background: rgba(216, 176, 114, 0.30); color: #faf3e6; }  /* Firefox needs the prefixed twin */
 
 /* focus ring — visible, high-contrast, theme-aware (was missing) */
 :focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; border-radius: 2px; }
@@ -108,12 +115,12 @@ h1, h2, h3 { font-family: var(--display); font-weight: 500; line-height: 1.04; l
 
 /* literary polish: widow/orphan control, display-type kerning/ligatures, and
    lining figures kept on the mono labels (old-style only on the serif body) */
-h1, h2, h3, .display, .hero-title, .manifesto p, .about-quote, .lt-epigraph, .letter-title, .inscription, .salutation { text-wrap: balance; }
-.letter-body > p, .about-body p, .hero-sub, .lt-note, .tri p { text-wrap: pretty; }
-h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { font-kerning: normal; font-feature-settings: "kern" 1, "liga" 1, "dlig" 1; }
-.meta, .eyebrow, .nav a, .brand-name, .lt-date, .lt-min, .ln-dir, .part-count, .foot-fine, .foot-links a, .star .st-date, .pc-role { font-variant-numeric: normal; }
+h1, h2, h3, .display, .hero-title, .about-quote, .lt-epigraph, .letter-title, .inscription, .salutation { text-wrap: balance; }
+.letter-body > p, .about-body p, .hero-sub, .lt-note { text-wrap: pretty; }
+h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: normal; font-feature-settings: "kern" 1, "liga" 1, "dlig" 1; }
+.meta, .eyebrow, .nav a, .brand-name, .lt-date, .lt-min, .ln-dir, .foot-fine, .star .st-date { font-variant-numeric: normal; }
 
-.eyebrow { font-family: var(--mono); font-size: 0.76rem; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); padding-left: 0.3em; }
+.eyebrow { font-family: var(--mono); font-size: 0.76rem; font-weight: 500; letter-spacing: 0.26em; text-transform: uppercase; color: var(--gold); padding-left: 0.26em; }
 .meta { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); }
 
 .ornament { color: var(--gold); text-align: center; user-select: none; }
@@ -229,37 +236,6 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 @keyframes lumen-out { 0% { opacity: 0; transform: scale(0.6); } 100% { opacity: 1; transform: scale(1.45); } }
 .reduced .lumen { display: none; }
 
-/* ----------------------------------------------------------- manifesto */
-.manifesto { text-align: center; }
-.manifesto p { font-family: var(--display); font-weight: 500; font-size: clamp(1.6rem, 3.6vw, 2.7rem); line-height: 1.32; color: var(--text); max-width: 22ch; margin-inline: auto; }
-.manifesto p .lit { color: var(--gold-bright); font-style: italic; }
-.manifesto .meta { margin-top: 1.2rem; }
-
-/* triptych: past / present / future (labels are NOT headings — fixes heading order) */
-.triptych { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); margin-top: 2.2rem; position: relative; }
-.triptych::before { content: ""; position: absolute; top: 28px; left: 13%; right: 13%; height: 1px; background: linear-gradient(90deg, transparent, var(--line) 16%, var(--line) 84%, transparent); z-index: 0; }   /* the light that travels: past -> present -> future */
-.tri { text-align: center; position: relative; z-index: 1; }
-.tri-icon { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; margin: 0 auto 1.1rem; color: var(--gold); background: radial-gradient(circle, var(--ink) 52%, transparent 78%); }
-.tri-icon svg { width: 28px; height: 28px; filter: drop-shadow(0 0 8px rgba(255,138,61,0.4)); }
-.tri-now { color: var(--gold-bright); }
-.tri-now svg { filter: drop-shadow(0 0 13px rgba(255,150,70,0.75)); }
-.tri-label { font-family: var(--display); font-size: 1.5rem; color: var(--gold); margin-bottom: 0.5rem; font-style: italic; }
-.tri p { color: var(--text-dim); font-size: 1.06rem; line-height: 1.62; }
-
-/* --------------------------------------------------------- parts teaser */
-.section-head { text-align: center; margin-bottom: clamp(2.5rem, 6vh, 4.5rem); }
-.section-head h1, .section-head h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
-.section-head .eyebrow { display: block; margin-bottom: 1rem; }
-.section-head .lede { color: var(--text-dim); font-style: italic; max-width: 46ch; margin: 1.2rem auto 0; }
-
-.parts { display: grid; gap: 1px; background: var(--line-soft); border-block: 1px solid var(--line-soft); }
-.part-row { display: grid; grid-template-columns: 5rem 1fr auto; align-items: center; gap: 1.5rem; padding: 1.9rem clamp(0.5rem, 2vw, 1.5rem); background: var(--ink); transition: background 0.6s var(--ease); position: relative; }
-.part-row:hover { background: var(--ink-2); }
-.part-num { font-family: var(--display); font-size: 2.4rem; color: var(--gold-soft); font-style: italic; opacity: 0.7; }
-.part-title { font-family: var(--display); font-size: clamp(1.4rem, 3vw, 2rem); }
-.part-blurb { display: block; font-family: var(--serif); font-style: italic; color: var(--text-faint); font-size: 1.02rem; margin-top: 0.2rem; }
-.part-count { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.16em; color: var(--text-faint); text-transform: uppercase; }
-
 /* ============================================================ THE LETTERS (timeline) */
 .lt-head { text-align: center; padding-top: clamp(7rem, 14vh, 10rem); }
 .lt-epigraph { font-family: var(--display); font-style: italic; font-size: clamp(1.3rem, 3vw, 2rem); color: var(--gold-bright); max-width: 26ch; margin: 1.6rem auto 0; line-height: 1.4; }
@@ -304,27 +280,34 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .letter-byline { text-align: center; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); margin-top: 0.85rem; }
 .letter-byline a { color: var(--gold-soft); border-bottom: 1px solid var(--line-soft); transition: color 0.3s; }
 .letter-byline a:hover { color: var(--gold-bright); }
-.letter-sub { text-align: center; color: var(--text-faint); font-style: italic; margin-top: 0.6rem; }
-.salutation { font-family: var(--display); font-style: italic; font-size: 1.5rem; color: var(--gold-bright); margin: 2.4rem 0 1.4rem; }
-.letter-body { font-size: 1.05em; line-height: 1.75; }   /* larger, airier for long-form reading */
+.salutation { font-family: var(--display); font-style: italic; font-size: 1.5rem; color: var(--gold-bright); margin: 2.2rem 0 1.1rem; }   /* sits close to its opening line, as a hand would write it */
+.letter-body { font-size: clamp(1.18rem, 0.4vw + 1.06rem, 1.32rem); line-height: 1.72; }   /* the reading page gets its own type scale — never sags on mid-size laptops */
 .letter-body > p { margin-bottom: 1.4em; }
+.letter-body > .salutation { margin-bottom: 1.1rem; }   /* outranks the generic paragraph spacing — the greeting sits close to its opening line */
 .letter-body > p + p { text-indent: 1.15em; }
 .letter-body .rule-orn + p { text-indent: 0; }   /* each movement restarts flush */
 .letter-body > p.dropcap { text-indent: 0; }      /* the drop-capped opening line aligns flush with its initial, not indented */
-.letter-body .farewell { font-style: italic; color: var(--text-dim); text-indent: 0; margin-top: 1.8em; }
-.letter-body .signature { text-align: right; font-family: var(--display); font-style: italic; font-size: 1.6rem; color: var(--gold-bright); text-indent: 0; margin-top: 0.8em; letter-spacing: 0.02em; padding-right: 0.4em; }
-.letter-body .signature::before { content: ""; display: block; width: 4rem; height: 1px; background: linear-gradient(90deg, transparent, var(--line)); margin: 0 0.4em 0.85rem auto; }
-.dropcap::first-letter { font-family: var(--display); float: left; font-size: 4.2em; line-height: 0.78; padding: 0.05em 0.12em 0 0; color: var(--gold); text-shadow: 0 0 26px rgba(255,150,70,0.35); }
+.letter-body .farewell { font-style: italic; color: var(--text-dim); text-indent: 0; margin-top: 2.2em; }   /* a real breath before the sign-off */
+.letter-body .signature { text-align: right; font-family: var(--display); font-style: italic; font-size: 1.6rem; color: var(--gold-bright); text-indent: 0; margin-top: 0.7em; letter-spacing: 0.02em; padding-right: 0.4em; }
+.letter-body .signature::before { content: ""; display: block; width: 4rem; height: 1px; background: linear-gradient(90deg, transparent, var(--line)); margin: 0 0.4em 1.05rem auto; }
+.dropcap::first-letter { font-family: var(--display); float: left; font-size: 3.9em; line-height: 0.72; padding: 0.04em 0.14em 0 0.02em; color: var(--gold); text-shadow: 0 0 26px rgba(255,150,70,0.35); }   /* spans a clean 3 lines, cap-top flush with line 1 */
 .letter-end { margin: 3rem 0 1rem; }
 
-.letter-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 3.5rem; border-top: 1px solid var(--line-soft); padding-top: 2rem; }
-.letter-nav a { display: block; transition: color 0.4s var(--ease); }
+.letter-nav { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 4vw, 2.5rem); margin-top: 3.5rem; border-top: 1px solid var(--line-soft); padding-top: 2rem; }
+.letter-nav a { display: block; min-width: 0; transition: color 0.4s var(--ease); }
 .letter-nav .ln-dir { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); display: block; margin-bottom: 0.4rem; }
 .letter-nav .ln-title { font-family: var(--display); font-size: 1.22rem; color: var(--text-dim); }
 .letter-nav a:hover .ln-title { color: var(--gold-bright); }
 .letter-nav .ln-next { text-align: right; }
 .letter-nav .ln-prev:only-child { grid-column: 1; }
 .letter-nav .ln-next:only-child { grid-column: 2; }
+/* small phones: the two between-letter links stack instead of cramping side by side */
+@media (max-width: 560px) {
+  .letter-nav { grid-template-columns: 1fr; gap: 1.4rem; }
+  .letter-nav .ln-next { text-align: left; border-top: 1px solid var(--line-soft); padding-top: 1.4rem; }
+  .letter-nav .ln-prev:only-child, .letter-nav .ln-next:only-child { grid-column: auto; }
+  .letter-nav .ln-next:only-child { border-top: 0; padding-top: 0; }
+}
 
 /* sparse embers behind the reading column edges (never over text) */
 .embers { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
@@ -335,7 +318,7 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .index-mobile-note { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.1rem; min-height: 56vh; padding: 0 var(--gutter); }
 .index-mobile-note .ornament-floret { color: var(--gold); font-size: 1.5rem; }
 .sky-head { text-align: center; padding-top: clamp(7rem, 14vh, 10rem); }
-.sky-wrap { position: relative; max-width: 70rem; margin: clamp(2rem,6vh,4rem) auto 0; padding: 0 var(--gutter) var(--section); }
+.sky-wrap { position: relative; max-width: 70rem; margin: clamp(2rem,6vh,4rem) auto 0; padding: 0 var(--gutter) var(--section); overflow: clip; }   /* edge-star hover labels clip at the sky's edge instead of widening the page */
 .sky-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
 .sky-list { position: relative; z-index: 1; list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem 0.9rem; }
 .sky-list li { }
@@ -356,7 +339,8 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 .sky-active .star:hover { transform: translate(-50%, -50%); background: none; }
 .sky-active .star .dot { width: 7px; height: 7px; background: var(--gold-soft); box-shadow: 0 0 9px 2px rgba(216,176,114,0.3); }
 .sky-active .star .st-text { position: absolute; top: calc(100% + 1px); left: 50%; transform: translateX(-50%);
-  white-space: nowrap; text-align: center; opacity: 0; transition: opacity 0.35s var(--ease); pointer-events: none; }
+  width: max-content; max-width: 15rem; white-space: normal; text-align: center; opacity: 0; transition: opacity 0.35s var(--ease); pointer-events: none;
+  background: rgba(11,10,9,0.84); padding: 0.3rem 0.6rem; border-radius: 4px; }   /* a faint ink plate so the label reads over the starfield; long titles wrap instead of overflowing */
 .sky-active .star:hover .st-text, .sky-active .star:focus-visible .st-text { opacity: 1; }
 .sky-active .star:hover .dot { transform: scale(1.45); box-shadow: 0 0 16px 4px rgba(255,180,90,0.75); }
 .sky-active .star.read .dot { width: 8px; height: 8px; box-shadow: 0 0 13px 3px rgba(255,180,90,0.75); }
@@ -397,19 +381,15 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
 }
 .portrait figcaption { margin-top: 1.2rem; }
 .portrait .pc-name { font-family: var(--display); font-style: italic; font-size: 1.35rem; color: var(--gold-bright); }
-.portrait .pc-role { display: block; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); margin-top: 0.35rem; }
 .inscription { text-align: center; font-family: var(--display); font-style: italic; font-size: clamp(1.3rem, 3vw, 1.9rem); color: var(--text); max-width: 28ch; margin: 0 auto; padding: var(--section) var(--gutter); line-height: 1.4; }
 .inscription .ornament-floret { display: block; margin-bottom: 1.4rem; }
 
 /* --------------------------------------------------------------- footer */
 .site-foot { border-top: 1px solid var(--line-soft); padding-block: clamp(2.4rem, 5vh, 3.4rem) 2.6rem; text-align: center; color: var(--text-faint); }
 .site-foot .ornament-floret { margin-bottom: 1rem; }
-.foot-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.4rem; }
-.foot-links a { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); transition: color 0.4s; }
-.foot-links a:hover { color: var(--gold-bright); }
 .foot-line { font-family: var(--serif); font-style: italic; font-size: 1.02rem; color: var(--text-faint); max-width: 44ch; margin: 0 auto 1.3rem; line-height: 1.65; }
 .foot-aside { font-family: var(--serif); font-style: italic; font-size: 0.9rem; color: var(--text-faint); opacity: 0.82; max-width: 42ch; margin: 0 auto 1.2rem; line-height: 1.6; }
-.foot-fine { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.16em; color: var(--text-faint); opacity: 0.72; }
+.foot-fine { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; color: var(--text-faint); opacity: 0.8; }   /* fine print that is still comfortably legible */
 
 /* one-time note (letters page): the "short version" notice — gentle, dismissible, remembers via localStorage */
 .note-toast { position: fixed; left: 50%; bottom: clamp(1rem, 4vh, 2.2rem); transform: translateX(-50%) translateY(0.8rem); z-index: 80; width: min(92vw, 30rem); opacity: 0; pointer-events: none; transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
@@ -470,10 +450,6 @@ h1, h2, h3, .display, .letter-title, .manifesto p, .about-quote, .salutation { f
   .nav-toggle.open span:nth-child(1){ top: 22px; transform: rotate(45deg); }
   .nav-toggle.open span:nth-child(2){ opacity: 0; }
   .nav-toggle.open span:nth-child(3){ top: 22px; transform: rotate(-45deg); }
-  .triptych { grid-template-columns: 1fr; gap: 2.5rem; }
-  .triptych::before { display: none; }
-  .part-row { grid-template-columns: 3rem 1fr; }
-  .part-count { display: none; }
   /* reading: wick becomes a top hairline */
   .wick-rail { left: 0; right: 0; top: 0; bottom: auto; width: auto; height: 3px; }
   .wick-track { inset: 0; width: 100%; height: 3px; left: 0; transform: none; }
