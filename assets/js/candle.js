@@ -74,7 +74,7 @@ async function boot() {
       .replace('#include <common>', '#include <common>\n varying vec3 vLocalPos;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\n vLocalPos = position;');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\n uniform float uFlick; uniform float uWaxTopY; varying vec3 vLocalPos;')
+      .replace('#include <common>', '#include <common>\n uniform float uFlick; uniform float uWaxTopY; varying vec3 vLocalPos;\n float waxHash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }\n float waxNoise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f); return mix(mix(waxHash(i),waxHash(i+vec2(1.,0.)),u.x), mix(waxHash(i+vec2(0.,1.)),waxHash(i+vec2(1.,1.)),u.x), u.y); }')
       .replace('#include <emissivemap_fragment>', `
         #include <emissivemap_fragment>
         float waxDepth = clamp((uWaxTopY - vLocalPos.y) / 1.55, 0.0, 1.0);   // 0 at top, 1 at base
@@ -82,6 +82,11 @@ async function boot() {
         float rimWrap = pow(1.0 - abs(dot(normalize(vViewPosition), vNormal)), 2.0);
         vec3 waxCore = vec3(1.0, 0.55, 0.26);                               // warm amber transmitted color (vintage, NOT white)
         float waxGlow = (topGlow*0.85 + rimWrap*topGlow*0.6) * (0.55 + 0.45*uFlick);
+        float ang = atan(vLocalPos.x, vLocalPos.z);
+        float streak = waxNoise(vec2(ang*3.6 + 2.0, vLocalPos.y*1.7)) - 0.5;   // hand-poured wax: faint vertical streaks, an uneven hot lip
+        float drip = waxNoise(vec2(ang*9.0, vLocalPos.y*0.6)) - 0.5;
+        diffuseColor.rgb *= 1.0 + streak*0.05 + drip*0.025;
+        waxGlow *= 1.0 + streak*0.45;
         float wd = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233)))*43758.5453);   // dither: the slow amber ramp on a big dark surface is the scene's #1 banding risk
         totalEmissiveRadiance += waxCore * waxGlow * 0.9 + (wd - 0.5) * 0.0045;
       `);
@@ -105,12 +110,10 @@ async function boot() {
     #define OCTAVES ${oct}
     float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<OCTAVES;i++){ v+=a*vnoise(p); p*=2.02; a*=0.5;} return v; }`;
 
-  const flameUniforms = { uTime: { value: 0 }, uFlick: { value: 1 } };
-  const flameMat = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: flameUniforms,
-    vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `,
-    fragmentShader: NOISE(lowPower ? 3 : 4) + (lowPower ? "\n#define LOWP\n" : "\n") + `
-      varying vec2 vUv; uniform float uTime; uniform float uFlick;
+  const flameUniforms = { uTime: { value: 0 }, uFlick: { value: 1 }, uAlphaMul: { value: lowPower ? 1.0 : 0.88 } };
+  const FLAME_VS = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `;
+  const FLAME_FS = NOISE(lowPower ? 3 : 4) + (lowPower ? "\n#define LOWP\n" : "\n") + `
+      varying vec2 vUv; uniform float uTime; uniform float uFlick; uniform float uAlphaMul;
       void main(){
         vec2 p=vUv; float t=p.y; float cx=p.x-0.5;
 
@@ -123,7 +126,7 @@ async function boot() {
           cx += tip * 0.06 * (0.72 + 0.42*uFlick) * grade * grade;   // the tip frays more on bright flares, calms on dim beats
         #else
           float tip = sin(p.y*7.0 - uTime*3.0) * 0.5;                 // phone: cheap analytic tip lick (1 sine, no extra octaves)
-          cx += tip * 0.045 * grade * grade;
+          cx += tip * 0.045 * (0.72 + 0.42*uFlick) * grade * grade;   // flare-coupled like the desktop fray
         #endif
 
         // ---- silhouette: rounded shoulder (gaussian) + neck below the tip + soft taper ----
@@ -156,7 +159,7 @@ async function boot() {
         col = mix(col, vec3(0.85,0.26,0.05), smoothstep(0.08,0.36,T));   // red-orange (widened stop softens the most band-prone seam)
         col = mix(col, vec3(1.00,0.49,0.12), smoothstep(0.30,0.56,T));   // orange
         col = mix(col, vec3(1.00,0.72,0.30), smoothstep(0.52,0.78,T));   // amber-yellow
-        col = mix(col, vec3(1.00,0.84,0.52), smoothstep(0.80,0.97,T));   // warm core kept amber (B well under R) -> no white halation
+        col = mix(col, vec3(1.00,0.86,0.55), smoothstep(0.80,0.97,T));   // warm core kept amber (B well under R) -> no white halation
 
         // faint blue collar at the very base around the wick
         col = mix(col, vec3(0.30,0.46,0.92),
@@ -175,11 +178,25 @@ async function boot() {
         float b = 0.42 + T*0.70;                         // brightness from temperature (calmer peak so the core stays warm, not white)
         b = b / (1.0 + 0.50*max(b-1.0,0.0));             // firm Reinhard shoulder -> hot core ~1.06, no white halation
         b += (hash(gl_FragCoord.xy*0.7) - 0.5) * 0.012;  // dither the additive ramp (no onion-ring banding over the black page)
-        gl_FragColor = vec4(col*b, a);
-      }`,
-  });
+        gl_FragColor = vec4(col*b, a*uAlphaMul);
+      }`;
+  const flameMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: flameUniforms, vertexShader: FLAME_VS, fragmentShader: FLAME_FS });
   const flame = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.8), flameMat);
   flame.position.y = 0.55 - burn; group.add(flame);
+  // volumetric thickness (desktop): a dimmer outer mantle that trails the core by ~120ms.
+  // A real flame is a body of hot gas — the envelope lags the core, and the slight
+  // parallax under camera drift makes the flame read as a volume, not a flat cutout.
+  let flameBack = null, flameBackT = null;
+  if (!lowPower) {
+    flameBackT = { value: 0 };
+    const flameBackMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      uniforms: { uTime: flameBackT, uFlick: flameUniforms.uFlick, uAlphaMul: { value: 0.36 } },
+      vertexShader: FLAME_VS, fragmentShader: FLAME_FS });
+    flameBack = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.8), flameBackMat);
+    flameBack.position.set(0, 0.55 - burn, -0.07);
+    group.add(flameBack);
+  }
 
   function makeGlow(size, powv, mul, colorHex, zoff, squash, rise) {
     const u = { uFlick: { value: 1 }, uColor: { value: new THREE.Color(colorHex) }, uPow: { value: powv },
@@ -208,6 +225,29 @@ async function boot() {
   const glowWide = makeGlow(lowPower ? 3.2 : 3.8, 2.2, 0.22, 0xff8a38, -0.22, 0.62, 0.16);
   const glowCore = makeGlow(1.9, 3.0, 0.24, 0xffb060, -0.12, 0.70, 0.20);
 
+  // a breath of smoke — a real candle barely smokes in still air, then releases a thin
+  // grey thread while a draft disturbs it. Normal blending (smoke occludes, it does not
+  // emit), whisper alpha, advected by value noise so the filament curls as it climbs.
+  const smokeUniforms = { uTime: flameUniforms.uTime, uSmoke: { value: 0 } };
+  const smokeMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: smokeUniforms,
+    vertexShader: FLAME_VS,
+    fragmentShader: NOISE(2) + `
+      varying vec2 vUv; uniform float uTime; uniform float uSmoke;
+      void main(){
+        float drift = vnoise(vec2(vUv.y*2.2 - uTime*0.5, uTime*0.16)) - 0.5;
+        float curl  = vnoise(vec2(vUv.y*5.5 - uTime*0.85, 7.3)) - 0.5;
+        float cx = vUv.x - 0.5 - drift*0.26*(vUv.y+0.12) - curl*0.06;
+        float w = mix(0.014, 0.055, vUv.y);
+        float fil = 1.0 - smoothstep(0.0, w, abs(cx));
+        float fade = (1.0 - smoothstep(0.5, 0.98, vUv.y)) * smoothstep(0.02, 0.14, vUv.y);
+        float a = fil * fade * uSmoke * 0.17;
+        if (a < 0.003) discard;
+        gl_FragColor = vec4(vec3(0.60,0.57,0.54), a);
+      }` });
+  const smoke = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.7), smokeMat);
+  smoke.position.set(0, 2.25 - burn, -0.02); group.add(smoke);
+  let smokeLvl = 0;
+
   function dotTexture() {
     const s = 64, c = document.createElement("canvas"); c.width = c.height = s;
     const g = c.getContext("2d"), grd = g.createRadialGradient(s/2, s/2, 0, s/2, s/2, s/2);
@@ -215,6 +255,12 @@ async function boot() {
     g.fillStyle = grd; g.fillRect(0, 0, s, s); return new THREE.CanvasTexture(c);
   }
   const sprite = dotTexture();
+
+  // liquid pool: a soft elongated glint riding the melt surface, pulsing with the flame —
+  // the cue that the top of the candle is molten wax, not painted plastic
+  const glint = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.09),
+    new THREE.MeshBasicMaterial({ map: sprite, color: 0xffc878, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false }));
+  glint.rotation.x = -Math.PI / 2; glint.position.set(0.015, -0.292, 0.10); group.add(glint);
 
   const EMB = lowPower ? 8 : 16;   // a still indoor candle sparks rarely (was 26/46 — that read as a campfire)
   const embPos = new Float32Array(EMB * 3), embData = [], embBase = -0.15 - burn;
@@ -304,6 +350,16 @@ async function boot() {
     pool.material.emissiveIntensity = 0.22 + 0.30 * f;
     wickTip.material.opacity = 0.30 + 0.40 * f;       // the ember seed breathes with the flame
     wickTip.scale.setScalar(0.92 + f * 0.18);
+    if (flameBack) {
+      flameBackT.value = t - 0.12;                    // the outer mantle trails the core
+      flameBack.scale.x = (0.93 + f * 0.10) * 0.945;
+      flameBack.scale.y = (0.98 + f * 0.09) * 0.97;
+    }
+    const smokeTarget = gust > 0.045 ? 1 : 0.06;      // the thread rises while a draft disturbs the flame, lingers, then settles
+    smokeLvl += (smokeTarget - smokeLvl) * (smokeTarget > smokeLvl ? 0.02 : 0.006);
+    smokeUniforms.uSmoke.value = smokeLvl;
+    glint.material.opacity = 0.14 + 0.24 * f;         // the molten pool catches the flame
+    glowCore.mesh.scale.setScalar(0.97 + f * 0.06);   // the halo breathes with the brightness, like camera bloom
 
     for (let i = 0; i < EMB; i++) {
       const e = embData[i]; if (e.life <= e.max) e.life += 0.016 * e.speed;   // parked embers (life>max) stop integrating
@@ -326,6 +382,9 @@ async function boot() {
     flame.lookAt(camera.position.x, flame.position.y, camera.position.z);
     flame.position.x = lean * 0.015;    // whole flame leans a touch with the breath (set AFTER lookAt)
     flame.rotation.z = -lean * 0.02;    // and shears ~1.1deg, AFTER lookAt so lookAt doesn't clobber it
+    if (flameBack) { flameBack.lookAt(camera.position.x, flameBack.position.y, camera.position.z); flameBack.position.x = lean * 0.028; flameBack.rotation.z = -lean * 0.014; }
+    smoke.lookAt(camera.position.x, smoke.position.y, camera.position.z);
+    smoke.position.x = lean * 0.05;     // the thread's base follows the tip's lean
     glowCore.mesh.lookAt(camera.position.x, glowCore.mesh.position.y, camera.position.z);
     glowWide.mesh.lookAt(camera.position.x, glowWide.mesh.position.y, camera.position.z);
     renderer.render(scene, camera);
