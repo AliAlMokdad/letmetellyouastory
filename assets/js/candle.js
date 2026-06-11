@@ -353,16 +353,20 @@ async function boot() {
     glowWide.u.uFlick.value = 0.50 + glowLag * 0.40;  // room throw: shimmers most, lags
     flameLight.intensity = 3.2 + f * 2.4;             // ceiling 5.6 — halation insurance
     flameLight.position.x = lean * 0.10;              // cast warmth tracks the visible lean, not the scalar
-    flame.scale.x = 0.93 + f * 0.10;                  // slightly less width pumping => steadier silhouette
-    flame.scale.y = 0.98 + f * 0.09;                  // more vertical draw-up on flares (the flame reaches as it breathes)
+    flame.scale.x = (0.93 + f * 0.10) * (0.72 + 0.28 * birth);   // a young flame is narrow; full silhouette once born
+    const syF = 0.98 + f * 0.09;                      // steady breathing draw-up (identical once born)
+    flame.scale.y = syF * (0.50 + 0.50 * birth);
+    flame.position.y = 0.55 - burn - 0.9 * syF * (1 - (0.50 + 0.50 * birth));   // the catch grows UP from the wick; this term is exactly zero after birth, so the settled flame breathes as before
     waxFlick.value = f;                               // wax internal glow pulses with the flame
     pool.material.emissiveIntensity = 0.22 + 0.30 * f;
     wickTip.material.opacity = 0.30 + 0.40 * f;       // the ember seed breathes with the flame
     wickTip.scale.setScalar(0.92 + f * 0.18);
     if (flameBack) {
       flameBackT.value = t - 0.12;                    // the outer mantle trails the core
-      flameBack.scale.x = (0.93 + f * 0.10) * 0.945;
-      flameBack.scale.y = (0.98 + f * 0.09) * 0.97;
+      flameBack.scale.x = (0.93 + f * 0.10) * 0.945 * (0.72 + 0.28 * birth);
+      const syB = (0.98 + f * 0.09) * 0.97;
+      flameBack.scale.y = syB * (0.50 + 0.50 * birth);
+      flameBack.position.y = 0.55 - burn - 0.9 * syB * (1 - (0.50 + 0.50 * birth));
     }
     const smokeTarget = gust > 0.045 ? 1 : 0.06;      // the thread rises while a draft disturbs the flame, lingers, then settles
     smokeLvl += (smokeTarget - smokeLvl) * (smokeTarget > smokeLvl ? 0.02 : 0.006);
