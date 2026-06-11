@@ -409,12 +409,12 @@ h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: n
 [data-reveal][data-delay="3"] { transition-delay: 0.36s; }
 
 /* --------------------------------------------------------- CSS fallback candle */
-.cf-glow { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); width: 230px; height: 264px; border-radius: 50%;
+.cf-glow { position: absolute; left: 50%; bottom: 39px; transform: translateX(-50%); width: 230px; height: 264px; border-radius: 50%;   /* bottom-anchored so the halo hugs the flame in any container height */
   background: radial-gradient(60% 52% at 50% 38%, rgba(255,228,184,0.50) 2%, rgba(255,176,92,0.40) 24%, rgba(255,120,50,0.12) 52%, transparent 74%); filter: blur(8px); }
-.cf-body { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 54px; height: 170px; border-radius: 6px 6px 3px 3px;
+.cf-body { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 66px; height: 150px; border-radius: 6px 6px 3px 3px;   /* stocky vintage pillar, matching the WebGL candle */
   background: radial-gradient(120% 60% at 50% 0%, rgba(255,170,90,0.45), transparent 60%), linear-gradient(180deg, #f3e7cb, #d3c099 35%, #b0986f);
   box-shadow: inset -10px 0 18px rgba(0,0,0,0.3), inset 8px 0 14px rgba(255,255,255,0.18), 0 0 22px rgba(255,150,70,0.18); }
-.cf-flame { position: absolute; left: 50%; top: 34px; transform: translateX(-50%); width: 24px; height: 66px; transform-origin: 50% 92%;
+.cf-flame { position: absolute; left: 50%; bottom: 138px; z-index: 2; transform: translateX(-50%); width: 24px; height: 66px; transform-origin: 50% 92%;   /* roots 12px behind the rim and paints ABOVE the body — it was hiding behind it on phones */
   border-radius: 50% 50% 50% 50% / 78% 78% 38% 38%;
   background: radial-gradient(ellipse at 50% 74%, #ffe7bd 8%, var(--gold-bright) 24%, var(--ember) 56%, var(--ember-deep) 84%, transparent 95%);
   box-shadow: 0 -2px 26px rgba(255,140,60,0.5), 0 -1px 10px rgba(255,200,120,0.5); animation: cf-flicker 3.4s ease-in-out infinite; }

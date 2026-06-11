@@ -44,7 +44,7 @@ async function boot() {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  camera.position.set(0, 0.95, 5.2);
+  camera.position.set(0, 0.95, 5.45);
 
   scene.add(new THREE.AmbientLight(0x2a2118, 0.6));
   const flameLight = new THREE.PointLight(0xffb066, 6, 9, 2);
@@ -58,7 +58,7 @@ async function boot() {
   // title instead of impaling it — recomputed in resize().
   function frame() {
     lift = isShort() ? 0.4 : (isPhone() ? 1.0 : 0);   // gentler lift in landscape so the flame never flies off-top
-    camera.position.z = isPhone() ? 6.6 : 5.2;        // smaller candle on phones
+    camera.position.z = isPhone() ? 6.85 : 5.45;      // a touch more air around the candle on both devices
     group.position.y = lift;
     flameLight.position.y = 0.55 - burn + lift;       // keep the key light married to the flame
   }
@@ -66,10 +66,10 @@ async function boot() {
 
   // wax body — translucent: the flame's light enters the top centimetre and re-emerges as a
   // warm internal glow, brightest at the lip, pulsing with the flame (onBeforeCompile SSS).
-  const waxMat = new THREE.MeshStandardMaterial({ color: 0xc8b890, roughness: 0.80, metalness: 0.0, emissive: 0x000000, emissiveIntensity: 1.0 });
+  const waxMat = new THREE.MeshStandardMaterial({ color: 0xcbb188, roughness: 0.80, metalness: 0.0, emissive: 0x000000, emissiveIntensity: 1.0 });   // aged honey-ivory, a step more vintage
   waxMat.onBeforeCompile = (sh) => {
     sh.uniforms.uFlick = waxFlick;
-    sh.uniforms.uWaxTopY = { value: 0.775 };   // local-space y of the cylinder top (height 1.55 => +0.775)
+    sh.uniforms.uWaxTopY = { value: 0.59 };    // local-space y of the cylinder top (height 1.18 => +0.59)
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\n varying vec3 vLocalPos;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\n vLocalPos = position;');
@@ -77,7 +77,7 @@ async function boot() {
       .replace('#include <common>', '#include <common>\n uniform float uFlick; uniform float uWaxTopY; varying vec3 vLocalPos;\n float waxHash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }\n float waxNoise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f); return mix(mix(waxHash(i),waxHash(i+vec2(1.,0.)),u.x), mix(waxHash(i+vec2(0.,1.)),waxHash(i+vec2(1.,1.)),u.x), u.y); }')
       .replace('#include <emissivemap_fragment>', `
         #include <emissivemap_fragment>
-        float waxDepth = clamp((uWaxTopY - vLocalPos.y) / 1.55, 0.0, 1.0);   // 0 at top, 1 at base
+        float waxDepth = clamp((uWaxTopY - vLocalPos.y) / 1.18, 0.0, 1.0);   // 0 at top, 1 at base
         float topGlow = pow(1.0 - waxDepth, 2.6);                           // bright lip, quick falloff
         float rimWrap = pow(1.0 - abs(dot(normalize(vViewPosition), vNormal)), 2.0);
         vec3 waxCore = vec3(1.0, 0.55, 0.26);                               // warm amber transmitted color (vintage, NOT white)
@@ -91,17 +91,21 @@ async function boot() {
         totalEmissiveRadiance += waxCore * waxGlow * 0.9 + (wd - 0.5) * 0.0045;
       `);
   };
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 1.55, 48, 1), waxMat);
-  body.position.y = -1.075; group.add(body);   // height 1.55, top stays at y=-0.30 so flame/wick/pool are unmoved
-  const pool = new THREE.Mesh(new THREE.CircleGeometry(0.33, 48), new THREE.MeshStandardMaterial({ color: 0x6f5a39, roughness: 0.30, metalness: 0.0, emissive: 0x3a2510, emissiveIntensity: 0.22 }));
-  pool.rotation.x = -Math.PI / 2; pool.position.y = -0.30 - burn; group.add(pool);
+  // stocky vintage pillar: wider, shorter, slightly tapered. Top rim stays at y=-0.30.
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.50, 1.18, 48, 1), waxMat);
+  body.position.y = -0.89; group.add(body);   // -0.30 - 1.18/2: the rim never moves, the flame anchor holds
+  // the melt pool sits sunk INTO the body — a burned-in well, the way a real pillar
+  // candle hollows itself. The front rim hides the very root of the flame from a
+  // head-on reader, which is exactly how a lived-with candle looks.
+  const pool = new THREE.Mesh(new THREE.CircleGeometry(0.44, 48), new THREE.MeshStandardMaterial({ color: 0x6f5a39, roughness: 0.30, metalness: 0.0, emissive: 0x3a2510, emissiveIntensity: 0.22 }));
+  pool.rotation.x = -Math.PI / 2; pool.position.y = -0.345 - burn; group.add(pool);
   const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.010, 0.018, 0.14, 8), new THREE.MeshBasicMaterial({ color: 0x140d08 }));
-  wick.position.y = -0.235 - burn; group.add(wick);   // tuck the wick base into the dark inner cone
+  wick.position.y = -0.275 - burn; group.add(wick);   // rooted in the sunken pool, base tucked into the dark inner cone
   // incandescent wick tip — real wicks glow ember-orange where the flame eats them.
   // A tiny additive seed inside the dark inner cone; pulses with the flicker.
   const wickTip = new THREE.Mesh(new THREE.SphereGeometry(0.020, 8, 6),
     new THREE.MeshBasicMaterial({ color: 0xff7a2e, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false }));
-  wickTip.position.y = -0.168 - burn; group.add(wickTip);
+  wickTip.position.y = -0.208 - burn; group.add(wickTip);
 
   const NOISE = (oct) => `
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
@@ -332,7 +336,12 @@ async function boot() {
     rafId = null; if (!activeNow()) return; rafId = requestAnimationFrame(loop);
     const t = clock.getElapsedTime();
     draft *= 0.94; if (performance.now() - lastMove > 1200) draft *= 0.9;
-    const f = flicker(t);
+    // the wick catches: the flame is born small and grows to full in its first breaths,
+    // instead of appearing already lit. Every system keys off f, so the glow, the cast
+    // light, the wax, the pool and the embers all rise with it.
+    const birthT = Math.min(1, Math.max(0, (t - 0.12) / 1.45));
+    const birth = birthT * birthT * (3 - 2 * birthT);
+    const f = flicker(t) * (0.22 + 0.78 * birth);
     const lean = Math.sin(t*0.5)*0.55 + Math.sin(t*1.3 + 2.1)*0.22;   // two-rate lean: slow drift + a quicker sway (livelier, shared by light + flame)
     if (lastMove === 0) {              // no pointer has ever moved (touch devices): a held-breath camera drift so phones never feel frozen
       target.x = Math.sin(t*0.13)*0.06 + Math.sin(t*0.29 + 0.8)*0.025;
