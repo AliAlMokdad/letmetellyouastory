@@ -399,6 +399,7 @@ async function boot() {
   }
   canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); onScreen = false; if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     window.removeEventListener("pointermove", onPointerMove); ro.disconnect(); if (io) io.disconnect();   // tear down listeners/observers when we fall back to CSS
+    if (roT) { cancelAnimationFrame(roT); roT = null; }   // a resize scheduled in this same frame must not run against the disposed renderer
     sprite.dispose(); renderer.dispose();   // release GPU-side handles too — we never come back from the CSS fallback
     root.classList.add("no-webgl"); });
 
