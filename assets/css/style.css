@@ -156,11 +156,6 @@ h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: n
 .btn-ghost { border-color: transparent; background: transparent; box-shadow: none; padding-inline: 0.4rem; }
 .btn-ghost:hover { background: transparent; box-shadow: none; }
 
-/* download / offline band (letters page) */
-.offline-band { text-align: center; padding-block: clamp(2.5rem, 7vh, 5rem) 0; }
-.offline-band .eyebrow { display: block; margin-bottom: 1rem; }
-.offline-note { font-family: var(--serif); font-style: italic; color: var(--text-dim); max-width: 38ch; margin: 0 auto 2rem; line-height: 1.62; }
-
 /* ============================================================ HOME / hero */
 .hero { position: relative; min-height: 100svh; display: grid; grid-template-rows: 1.5fr auto 0.42fr; align-items: center; text-align: center; isolation: isolate; }
 #candle-canvas { position: absolute; inset: 0 0 auto 0; z-index: -1; width: 100%; height: 80%; display: block;
@@ -318,7 +313,11 @@ h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: n
 .index-mobile-note { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.1rem; min-height: 56vh; padding: 0 var(--gutter); }
 .index-mobile-note .ornament-floret { color: var(--gold); font-size: 1.5rem; }
 .sky-head { text-align: center; padding-top: clamp(7rem, 14vh, 10rem); }
+.sky-count { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-soft); margin-top: 1.7rem; }
 .sky-wrap { position: relative; max-width: 70rem; margin: clamp(2rem,6vh,4rem) auto 0; padding: 0 var(--gutter) var(--section); overflow: clip; }   /* edge-star hover labels clip at the sky's edge instead of widening the page */
+/* a quiet vignette composes the sky: open at the centre, settling into the dark at the edges */
+.sky-wrap.sky-active::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(115% 92% at 50% 42%, transparent 56%, rgba(5,4,3,0.34) 86%, rgba(5,4,3,0.55) 100%); }   /* above the canvas, below the letter pills (the list is a later sibling at the same level) */
 .sky-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
 .sky-list { position: relative; z-index: 1; list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem 0.9rem; }
 .sky-list li { }
@@ -462,6 +461,8 @@ h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: n
   .candle-fallback { top: 34%; transform: translate(-50%, -100%); width: 88px; height: 188px; }
   /* Index is desktop-only: hide its nav link + the constellation; show the phone note */
   .nav-desktop-only { display: none !important; }
+  /* phones lose the long footer inscription; the fine print carries the page */
+  .foot-line { display: none; }
   .sky-head, .sky-wrap { display: none; }
   .index-mobile-note { display: flex; }
   /* HOME phone only: hide the faint scroll dot, let the footer rise gently into the dark
