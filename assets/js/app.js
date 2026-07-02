@@ -63,6 +63,9 @@
     toggle.addEventListener("click", function () {
       if (nav.classList.contains("open")) closeNav(); else openNav();
     });
+    window.addEventListener("pageshow", function (ev) {   // a bfcache restore must never resurrect a stuck scroll lock
+      if (ev.persisted) document.documentElement.classList.remove("nav-locked");
+    });
     links.forEach(function (a) { a.addEventListener("click", function () { closeNav(false); }); });
     mq.addEventListener ? mq.addEventListener("change", syncInert) : mq.addListener(syncInert);
     syncInert();

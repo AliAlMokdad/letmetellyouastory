@@ -100,7 +100,7 @@ async function boot() {
         waxGlow *= 1.0 + streak*0.45;
         float runWhere = smoothstep(0.62, 0.88, waxNoise(vec2(ang*4.2 + 9.7, 1.3)));   // frozen drip runs: a few angular lanes where wax once spilled over the lip
         float runLen   = 0.22 + 0.55*waxNoise(vec2(ang*4.2 + 3.1, 6.4));               // each run froze at its own length
-        float runlet   = runWhere * smoothstep(runLen, runLen - 0.09, waxDepth) * smoothstep(0.02, 0.10, waxDepth);
+        float runlet   = runWhere * (1.0 - smoothstep(runLen - 0.09, runLen, waxDepth)) * smoothstep(0.02, 0.10, waxDepth);   // ascending smoothstep, inverted: reversed edges are GLSL UB (same landmine class as pow-negative-base)
         diffuseColor.rgb *= 1.0 + runlet*0.12;                                          // a raised rivulet reads a shade lighter
         waxGlow *= 1.0 + runlet*0.5;                                                    // and carries the lip's glow a little further down
         float wd = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233)))*43758.5453);   // dither: the slow amber ramp on a big dark surface is the scene's #1 banding risk
