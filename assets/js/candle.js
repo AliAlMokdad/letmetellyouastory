@@ -33,7 +33,7 @@ if (!canvas || reduced || !hasWebGL()) {
 }
 
 async function boot() {
-  const THREE = await withTimeout(import("/assets/js/three.module.js?v=4d8e72af"), 6000);
+  const THREE = await withTimeout(import("/assets/js/three.module.js?v=4d8e72af"), 9000);   // low-priority preload needs more slack on slow links before the CSS candle takes over
 
   // lowPower uses min(w,h) so a phone booted in landscape still takes the cheap path
   const lowPower = Math.min(window.innerWidth, window.innerHeight) < 760 || (navigator.hardwareConcurrency || 8) <= 4 || window.devicePixelRatio > 2.5;

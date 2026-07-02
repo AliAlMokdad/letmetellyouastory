@@ -55,7 +55,9 @@
     function onKey(e) {
       if (e.key === "Escape") { closeNav(); return; }
       if (e.key !== "Tab" || !links.length) return;
-      var first = links[0], last = links[links.length - 1];
+      // the trap cycles the toggle (the visible close button) together with the links,
+      // so a keyboard user can always reach it
+      var first = toggle, last = links[links.length - 1];
       if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
@@ -70,6 +72,56 @@
     mq.addEventListener ? mq.addEventListener("change", syncInert) : mq.addListener(syncInert);
     syncInert();
   }
+
+  /* the candle remembers: a returning reader's flame continues where it stopped.
+     Enhancement only — no-JS and first-visit keep the static "Light the first letter".
+     Runs on DOMContentLoaded: app.js executes before ltys.js in defer order, so
+     window.LTYS does not exist yet at parse time. */
+  document.addEventListener("DOMContentLoaded", function () {
+  var chainEl = document.getElementById("ltys-chain");
+  if (chainEl && window.LTYS && LTYS.count() > 0) {
+    try {
+      var chain = JSON.parse(chainEl.textContent || "[]");
+      var escText = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+      var next = null;
+      if (LTYS.count() < LTYS.total) {
+        var last = LTYS.lastRead(), start = 0;
+        for (var ci = 0; ci < chain.length; ci++) { if (chain[ci].s === last) { start = ci + 1; break; } }
+        for (var cj = 0; cj < chain.length; cj++) {
+          var cand = chain[(start + cj) % chain.length];
+          if (!LTYS.isRead(cand.s)) { next = cand; break; }
+        }
+      }
+      var heroCta = document.querySelector(".hero .hero-cta .btn");
+      if (heroCta) {
+        var line = "";
+        if (!next) {
+          heroCta.innerHTML = 'Return to the letters <span class="arrow">&rarr;</span>';
+          line = "All " + LTYS.total + " lights are lit. Stay as long as you need.";
+        } else {
+          heroCta.setAttribute("href", next.u);
+          heroCta.innerHTML = 'Continue: <em>' + escText(next.t) + '</em> <span class="arrow">&rarr;</span>';
+          line = LTYS.count() + " of " + LTYS.total + " letters lit. The candle remembers.";
+        }
+        if (line) {
+          var ret = document.createElement("p");
+          ret.className = "hero-return";
+          ret.textContent = line;
+          heroCta.parentNode.insertAdjacentElement("afterend", ret);
+        }
+      }
+      // the letters page carries the same thread: phone readers never see the
+      // desktop constellation, so the timeline welcomes them back here
+      var ltHead = document.querySelector(".lt-head");
+      if (ltHead && next) {
+        var cont = document.createElement("p");
+        cont.className = "lt-note lt-continue";
+        cont.innerHTML = 'Continue with <a href="' + next.u + '"><em>' + escText(next.t) + '</em></a> <span aria-hidden="true">&rarr;</span>';
+        ltHead.appendChild(cont);
+      }
+    } catch (e) {}
+  }
+  });
 
   /* scroll reveal */
   var items = document.querySelectorAll("[data-reveal]");
@@ -121,6 +173,11 @@
   if (lumen) {
     var resetLumen = function () { lumen.className = "lumen"; };
     window.addEventListener("pageshow", function (ev) { if (ev.persisted) resetLumen(); }); // clear any stuck overlay on bfcache restore
+    // arrival: the carried light settles onto the new page (home has its own hero-veil)
+    if (!reduced && !document.body.classList.contains("home")) {
+      lumen.classList.add("in");
+      lumen.addEventListener("animationend", function (ev) { if (ev.animationName === "lumen-in") lumen.classList.remove("in"); });
+    }
     if (!reduced) {
       document.addEventListener("click", function (e) {
         var a = e.target.closest ? e.target.closest("a[href]") : null;
@@ -131,6 +188,7 @@
         if (url.pathname === location.pathname) return;  // same page / hash anchor: no transition
         e.preventDefault();
         var done = false, go = function () { if (done) return; done = true; location.href = a.href; };
+        lumen.classList.remove("in");
         lumen.classList.add("out");
         lumen.addEventListener("animationend", go, { once: true });
         setTimeout(go, 720);  // fail-safe: navigate even if animationend never fires

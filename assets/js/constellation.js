@@ -20,9 +20,11 @@
   var countEl = document.querySelector(".sky-count");
   if (countEl && window.LTYS) {
     var n = LTYS.count();
-    countEl.textContent = n > 0
-      ? "You have lit " + n + " of " + LTYS.total + " lights."
-      : "No lights lit yet. Begin anywhere.";
+    countEl.textContent = n >= LTYS.total
+      ? "All " + LTYS.total + " lights are lit. Thank you for staying."
+      : (n > 0
+        ? "You have lit " + n + " of " + LTYS.total + " lights."
+        : "No lights lit yet. Begin anywhere.");
   }
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -133,12 +135,23 @@
     }
   }
 
-  function drawHalo(x, y, r, alpha, warm) {
-    var g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, "rgba(" + (warm ? "255,205,130," : "210,140,80,") + alpha.toFixed(3) + ")");
+  // halos are pre-rendered sprites: one gradient each at startup instead of
+  // ~37 createRadialGradient allocations per frame
+  function makeHaloSprite(warm) {
+    var S = 64, c = document.createElement("canvas"); c.width = c.height = S;
+    var g2 = c.getContext("2d");
+    var g = g2.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    g.addColorStop(0, warm ? "rgba(255,205,130,1)" : "rgba(210,140,80,1)");
     g.addColorStop(1, "rgba(255,180,100,0)");
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+    g2.fillStyle = g; g2.fillRect(0, 0, S, S);
+    return c;
+  }
+  var haloWarm = makeHaloSprite(true), haloCool = makeHaloSprite(false);
+  function drawHalo(x, y, r, alpha, warm) {
+    if (alpha <= 0 || r <= 0) return;
+    ctx.globalAlpha = Math.min(alpha, 1);
+    ctx.drawImage(warm ? haloWarm : haloCool, x - r, y - r, r * 2, r * 2);
+    ctx.globalAlpha = 1;
   }
 
   function drawPath(alpha) {

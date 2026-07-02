@@ -23,6 +23,15 @@ window.LTYS = (function () {
   }
   function count() { return Object.keys(state.read).length; }
   function progress() { return Math.min(1, count() / TOTAL); }
+  function lastRead() {
+    // the most recently lit letter (older entries stored `true`, not a timestamp — treat as oldest)
+    var best = null, bt = -1;
+    for (var k in state.read) {
+      var v = state.read[k], t = typeof v === "number" ? v : 0;
+      if (t >= bt) { bt = t; best = k; }
+    }
+    return best;
+  }
 
   /* light up any element that carries data-slug for an already-read letter */
   function applyStates(root) {
@@ -31,7 +40,7 @@ window.LTYS = (function () {
     });
   }
 
-  return { isRead: isRead, markRead: markRead, count: count, progress: progress, total: TOTAL, applyStates: applyStates };
+  return { isRead: isRead, markRead: markRead, count: count, progress: progress, lastRead: lastRead, total: TOTAL, applyStates: applyStates };
 })();
 
 /* apply read-state once the DOM is ready */
