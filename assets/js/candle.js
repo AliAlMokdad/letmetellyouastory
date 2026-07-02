@@ -21,10 +21,15 @@ function withTimeout(p, ms) {
   return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
 }
 
+const bootCleanup = [];   // filled as boot() attaches listeners/observers — drained if boot dies mid-flight
 if (!canvas || reduced || !hasWebGL()) {
   root.classList.add(reduced ? "reduced" : "no-webgl");
 } else {
-  boot().catch(() => root.classList.add("no-webgl"));
+  boot().catch(() => {
+    bootCleanup.forEach((fn) => { try { fn(); } catch (_) {} });   // a mid-boot throw must not strand live listeners on a dead scene
+    bootCleanup.length = 0;
+    root.classList.add("no-webgl");
+  });
 }
 
 async function boot() {
@@ -39,6 +44,7 @@ async function boot() {
   const waxFlick = { value: 1 };    // flame -> wax coupling: the translucent wax glow pulses with the flame
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !lowPower, powerPreference: "high-performance" });
+  bootCleanup.push(() => renderer.dispose());
   renderer.setClearColor(0x000000, 0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1.25 : 2));
 
@@ -71,8 +77,13 @@ async function boot() {
     sh.uniforms.uFlick = waxFlick;
     sh.uniforms.uWaxTopY = { value: 0.59 };    // local-space y of the cylinder top (height 1.18 => +0.59)
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\n varying vec3 vLocalPos;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\n vLocalPos = position;');
+      .replace('#include <common>', '#include <common>\n varying vec3 vLocalPos;\n float lipHash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }\n float lipNoise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f); return mix(mix(lipHash(i),lipHash(i+vec2(1.,0.)),u.x), mix(lipHash(i+vec2(0.,1.)),lipHash(i+vec2(1.,1.)),u.x), u.y); }')
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+ vLocalPos = position;
+ float lipAng = atan(position.x, position.z);
+ float lipDip = pow(lipNoise(vec2(lipAng*1.35 + 4.2, 2.7)), 2.0) * 0.075
+             + lipNoise(vec2(lipAng*5.0 + 11.0, 8.5)) * 0.016;
+ transformed.y -= smoothstep(0.34, 0.59, position.y) * lipDip;`);   // melted lip: one or two broad sags + fine crumble; only the top ~quarter deforms, the flame anchor holds
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', '#include <common>\n uniform float uFlick; uniform float uWaxTopY; varying vec3 vLocalPos;\n float waxHash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }\n float waxNoise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f); return mix(mix(waxHash(i),waxHash(i+vec2(1.,0.)),u.x), mix(waxHash(i+vec2(0.,1.)),waxHash(i+vec2(1.,1.)),u.x), u.y); }')
       .replace('#include <emissivemap_fragment>', `
@@ -87,6 +98,11 @@ async function boot() {
         float drip = waxNoise(vec2(ang*9.0, vLocalPos.y*0.6)) - 0.5;
         diffuseColor.rgb *= 1.0 + streak*0.05 + drip*0.025;
         waxGlow *= 1.0 + streak*0.45;
+        float runWhere = smoothstep(0.62, 0.88, waxNoise(vec2(ang*4.2 + 9.7, 1.3)));   // frozen drip runs: a few angular lanes where wax once spilled over the lip
+        float runLen   = 0.22 + 0.55*waxNoise(vec2(ang*4.2 + 3.1, 6.4));               // each run froze at its own length
+        float runlet   = runWhere * smoothstep(runLen, runLen - 0.09, waxDepth) * smoothstep(0.02, 0.10, waxDepth);
+        diffuseColor.rgb *= 1.0 + runlet*0.12;                                          // a raised rivulet reads a shade lighter
+        waxGlow *= 1.0 + runlet*0.5;                                                    // and carries the lip's glow a little further down
         float wd = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233)))*43758.5453);   // dither: the slow amber ramp on a big dark surface is the scene's #1 banding risk
         totalEmissiveRadiance += waxCore * waxGlow * 0.9 + (wd - 0.5) * 0.0045;
       `);
@@ -296,6 +312,7 @@ async function boot() {
     lastPx = nx; lastPy = ny; lastMove = performance.now();
   };
   window.addEventListener("pointermove", onPointerMove, { passive: true });
+  bootCleanup.push(() => window.removeEventListener("pointermove", onPointerMove));
 
   let lastW = 0, lastH = 0, roT = null;
   function resize() {
@@ -307,6 +324,7 @@ async function boot() {
   }
   const ro = new ResizeObserver(() => { if (roT) return; roT = requestAnimationFrame(() => { roT = null; resize(); }); });
   ro.observe(canvas); resize();
+  bootCleanup.push(() => { ro.disconnect(); if (roT) { cancelAnimationFrame(roT); roT = null; } });
 
   // cheap 1D value noise for non-periodic flicker drift (kills the audible/visible loop)
   function vn(x){ const i=Math.floor(x), f=x-i;
@@ -404,11 +422,14 @@ async function boot() {
   }
   function kick() { if (activeNow() && rafId === null) loop(); }
 
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) kick(); });
+  const onVis = () => { if (!document.hidden) kick(); };
+  document.addEventListener("visibilitychange", onVis);
+  bootCleanup.push(() => document.removeEventListener("visibilitychange", onVis));
   let io = null;
   if ("IntersectionObserver" in window) {
     io = new IntersectionObserver((es) => { onScreen = es[0].isIntersecting; kick(); }, { threshold: 0 });
     io.observe(canvas);
+    bootCleanup.push(() => io.disconnect());
   }
   canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); onScreen = false; if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     window.removeEventListener("pointermove", onPointerMove); ro.disconnect(); if (io) io.disconnect();   // tear down listeners/observers when we fall back to CSS

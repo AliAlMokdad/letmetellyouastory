@@ -39,6 +39,7 @@
       toggle.setAttribute("aria-expanded", "true");
       toggle.setAttribute("aria-label", "Close menu");
       nav.removeAttribute("inert");
+      document.documentElement.classList.add("nav-locked");
       if (links[0]) links[0].focus();
       document.addEventListener("keydown", onKey);
     }
@@ -46,6 +47,7 @@
       nav.classList.remove("open"); toggle.classList.remove("open");
       toggle.setAttribute("aria-expanded", "false");
       toggle.setAttribute("aria-label", "Open menu");
+      document.documentElement.classList.remove("nav-locked");
       document.removeEventListener("keydown", onKey);
       syncInert();
       if (returnFocus !== false) toggle.focus();

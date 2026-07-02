@@ -221,6 +221,7 @@ h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: n
 .lt-head { text-align: center; padding-top: clamp(7rem, 14vh, 10rem); }
 .lt-epigraph { font-family: var(--display); font-style: italic; font-size: clamp(1.3rem, 3vw, 2rem); color: var(--gold-bright); max-width: 26ch; margin: 1.6rem auto 0; line-height: 1.4; }
 .lt-note { color: var(--text-dim); max-width: 40ch; margin: 1.8rem auto 0; font-style: italic; }
+.lt-offline { font-size: 0.86rem; opacity: 0.72; margin-top: 1rem; }   /* the quiet offline promise under the letters intro */
 
 .timeline { position: relative; max-width: 44rem; margin: clamp(3rem,8vh,6rem) auto; padding-left: clamp(2.2rem, 8vw, 4rem); }
 .spine { position: absolute; left: clamp(0.8rem, 3.5vw, 1.6rem); top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--gold) 0%, var(--gold-soft) 40%, var(--ember) 78%, var(--ember-deep) 100%); opacity: 0.5; }
@@ -399,9 +400,13 @@ h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: n
 /* --------------------------------------------------------- CSS fallback candle */
 .cf-glow { position: absolute; left: 50%; bottom: 39px; transform: translateX(-50%); width: 230px; height: 264px; border-radius: 50%;   /* bottom-anchored so the halo hugs the flame in any container height */
   background: radial-gradient(60% 52% at 50% 38%, rgba(255,228,184,0.50) 2%, rgba(255,176,92,0.40) 24%, rgba(255,120,50,0.12) 52%, transparent 74%); filter: blur(8px); }
-.cf-body { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 66px; height: 150px; border-radius: 6px 6px 3px 3px;   /* stocky vintage pillar, matching the WebGL candle */
+.cf-body { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 66px; height: 150px; border-radius: 9px 14px 3px 3px / 12px 19px 3px 3px;   /* stocky vintage pillar, lip sagging unevenly like a lived-with candle */
   background: radial-gradient(120% 60% at 50% 0%, rgba(255,170,90,0.45), transparent 60%), linear-gradient(180deg, #f3e7cb, #d3c099 35%, #b0986f);
   box-shadow: inset -10px 0 18px rgba(0,0,0,0.3), inset 8px 0 14px rgba(255,255,255,0.18), 0 0 22px rgba(255,150,70,0.18); }
+.cf-body::before { content: ""; position: absolute; top: -1px; left: 9px; width: 10px; height: 36px; border-radius: 5px 5px 6px 8px;   /* a frozen drip run over the lip */
+  background: linear-gradient(180deg, #f0e3c6, #cbb68d 68%, rgba(176,152,111,0)); opacity: 0.9; }
+.cf-body::after { content: ""; position: absolute; top: -1px; right: 12px; width: 7px; height: 21px; border-radius: 4px 4px 5px 7px;   /* a shorter second run */
+  background: linear-gradient(180deg, #f0e3c6, #cdb890 72%, rgba(176,152,111,0)); opacity: 0.8; }
 .cf-flame { position: absolute; left: 50%; bottom: 138px; z-index: 2; transform: translateX(-50%); width: 24px; height: 66px; transform-origin: 50% 92%;   /* roots 12px behind the rim and paints ABOVE the body — it was hiding behind it on phones */
   border-radius: 50% 50% 50% 50% / 78% 78% 38% 38%;
   background: radial-gradient(ellipse at 50% 74%, #ffe7bd 8%, var(--gold-bright) 24%, var(--ember) 56%, var(--ember-deep) 84%, transparent 95%);
@@ -416,6 +421,24 @@ h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: n
   30%{ transform: translateX(-50.5%) scale(1.03,0.98) rotate(1.4deg) }
   55%{ transform: translateX(-49.5%) scale(0.98,1.04) rotate(-0.6deg) }
   78%{ transform: translateX(-50%) scale(1.02,0.99) rotate(0.8deg) }
+}
+
+/* the open mobile drawer owns the screen — the page behind it must not scroll */
+html.nav-locked, html.nav-locked body { overflow: hidden; }
+
+/* --------------------------------------------------- reading room (laptop+) */
+/* The 37rem measure is right — long lines tire eyes. What breathes is the space
+   around it: the flanks carry a faint candlelit warmth instead of flat void,
+   and the letter gets a touch more air above its title. */
+@media (min-width: 1000px) {
+  body.reading-body {
+    background-image:
+      radial-gradient(42% 60% at 5% 22%, rgba(201,169,110,0.05), transparent 74%),
+      radial-gradient(42% 60% at 95% 62%, rgba(201,169,110,0.042), transparent 74%),
+      radial-gradient(70% 40% at 50% 112%, rgba(255,150,70,0.035), transparent 62%);
+    background-attachment: fixed;
+  }
+  .letter { padding-top: clamp(9.5rem, 19vh, 13rem); }
 }
 
 /* --------------------------------------------------------- reduced motion */
