@@ -38,5 +38,13 @@ AddType application/manifest+json .webmanifest
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+  # Legacy permalinks from the old WordPress site, mapped to the letter that
+  # replaced them. Search Console was reporting these as 404s with real inbound
+  # history, so they resolve instead of dying. Only mappings we can evidence:
+  # the old slug names the letter it points at.
+  RewriteRule ^final-letter-on-dreams-and-peace/?$ /letters/on-dreams-and-peace/ [L,R=301]
+  RewriteRule ^letter-25-on-grief-and-loss/?$ /letters/on-grief-and-loss/ [L,R=301]
+  RewriteRule ^final-letter/?$ /letters/on-dreams-and-peace/ [L,R=301]
 </IfModule>
 ErrorDocument 404 /404.html
