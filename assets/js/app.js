@@ -69,7 +69,11 @@
       if (ev.persisted) document.documentElement.classList.remove("nav-locked");
     });
     links.forEach(function (a) { a.addEventListener("click", function () { closeNav(false); }); });
-    mq.addEventListener ? mq.addEventListener("change", syncInert) : mq.addListener(syncInert);
+    var onBreakpoint = function () {        // widening past the drawer breakpoint must not leave the page scroll-locked
+      if (!mq.matches && nav.classList.contains("open")) closeNav(false);
+      syncInert();
+    };
+    mq.addEventListener ? mq.addEventListener("change", onBreakpoint) : mq.addListener(onBreakpoint);
     syncInert();
   }
 
@@ -151,7 +155,7 @@
     var NKEY = "ltys_note_short_v1", noteSeen = null;
     try { noteSeen = localStorage.getItem(NKEY); } catch (e) {}
     if (!noteSeen) {
-      var noteEsc = function (e) { if (e.key === "Escape") hideNote(); };
+      var noteEsc = function (e) { if (e.key === "Escape" && !document.documentElement.classList.contains("nav-locked")) hideNote(); };   // Esc on the open menu closes the menu, not the unseen note
       var hideNote = function () {
         note.classList.remove("in");
         try { localStorage.setItem(NKEY, "1"); } catch (e) {}

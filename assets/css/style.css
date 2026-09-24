@@ -396,13 +396,14 @@ h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: n
 .foot-fine { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; color: var(--text-faint); opacity: 0.8; margin-top: 1.6rem; }   /* the record, smallest and last */
 
 /* one-time note (letters page): the "short version" notice — gentle, dismissible, remembers via localStorage */
-.note-toast { position: fixed; left: 50%; bottom: clamp(1rem, 4vh, 2.2rem); transform: translateX(-50%) translateY(0.8rem); z-index: 80; width: min(92vw, 30rem); opacity: 0; pointer-events: none; transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.note-toast { position: fixed; left: 50%; bottom: calc(clamp(1rem, 4vh, 2.2rem) + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(0.8rem); z-index: 80; width: min(92vw, 30rem); opacity: 0; pointer-events: none; transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
 .note-toast.in { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
 .note-in { display: flex; align-items: flex-start; gap: 0.85rem; padding: 1rem 1.15rem; background: rgba(14, 11, 8, 0.96); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 20px 55px rgba(0,0,0,0.55); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
 .note-orn { flex-shrink: 0; color: var(--gold); font-size: 1.05rem; line-height: 1.5; }
 .note-text { flex: 1; margin: 0; font-family: var(--serif); font-style: italic; font-size: 0.98rem; line-height: 1.6; color: var(--text-dim); }
 .note-x { flex-shrink: 0; align-self: center; cursor: pointer; font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint); background: none; border: 1px solid var(--line-soft); border-radius: 100px; padding: 0.45rem 0.8rem; transition: color 0.3s, border-color 0.3s; }
-.note-x:hover, .note-x:focus-visible { color: var(--gold-bright); border-color: var(--gold); outline: none; }
+.note-x:hover, .note-x:focus-visible { color: var(--gold-bright); border-color: var(--gold); }
+.note-x:hover { outline: none; }
 @media (max-width: 600px) { .note-toast { left: 0.7rem; right: 0.7rem; width: auto; transform: translateY(0.8rem); } .note-toast.in { transform: translateY(0); } }
 
 /* --------------------------------------------------------- reveal motion */
