@@ -227,7 +227,7 @@
 
   function draw(ts) {
     rafId = null;
-    if (prev == null) prev = ts;
+    if (prev == null) { prev = ts; meteorAt = ts / 1000 + 12; }   // first meteor ~12s after the sky starts, not after page load
     var dt = Math.min((ts - prev) / 1000, 0.1); prev = ts;
     var t = ts / 1000;
 

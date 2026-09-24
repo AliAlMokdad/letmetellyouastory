@@ -440,6 +440,7 @@ h1, h2, h3, .display, .letter-title, .about-quote, .salutation { font-kerning: n
 
 /* the open mobile drawer owns the screen — the page behind it must not scroll */
 html.nav-locked, html.nav-locked body { overflow: hidden; }
+html.nav-locked .note-toast { opacity: 0; visibility: hidden; pointer-events: none; }   /* the open drawer must never sit under the note */
 
 /* --------------------------------------------------- reading room (laptop+) */
 /* The 37rem measure is right — long lines tire eyes. What breathes is the space
@@ -467,14 +468,6 @@ html.nav-locked, html.nav-locked body { overflow: hidden; }
   :root { --text: #f4ede0; --text-dim: #ded4c2; --text-faint: #c9bda9; --gold-soft: #e8c68e; }
 }
 
-/* the wax remembers your place: the quiet resume affordance on an unfinished letter */
-.resume-chip { position: fixed; left: 50%; bottom: max(1.4rem, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 40;
-  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-bright);
-  background: rgba(14,11,9,0.88); border: 1px solid rgba(216,176,114,0.32); border-radius: 100px; padding: 0.72rem 1.25rem;
-  cursor: pointer; opacity: 0; transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
-.resume-chip.in { opacity: 1; }
-.resume-chip.gone { opacity: 0; pointer-events: none; }
-.resume-chip:hover { border-color: rgba(216,176,114,0.6); }
 
 /* the night after / the night before: letters you have already lit carry their small star */
 .letter-nav a.read .ln-title::after { content: " \2726"; color: var(--gold-soft); font-size: 0.85em; }
@@ -492,7 +485,7 @@ html.nav-locked, html.nav-locked body { overflow: hidden; }
   html { scroll-behavior: auto; }
   body { background: #fff; color: #1c1712; font-size: 11.5pt; line-height: 1.62; }
   .site-head, .site-foot, .backdrop, .grain, .lumen, .hero-veil, .wick-rail,
-  .letter-nav, .letter-end .btn, .note-toast, .skip-link, .embers, .lights, .resume-chip { display: none !important; }
+  .letter-nav, .letter-end .btn, .note-toast, .skip-link, .embers, .lights { display: none !important; }
   .letter { max-width: 62ch; padding: 0; }
   .letter-body { font-size: 11.5pt; }             /* outranks the screen clamp — paper gets book size, not screen size */
   .letter-title { font-size: 24pt; break-after: avoid; }
