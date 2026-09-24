@@ -66,7 +66,9 @@
       if (nav.classList.contains("open")) closeNav(); else openNav();
     });
     window.addEventListener("pageshow", function (ev) {   // a bfcache restore must never resurrect a stuck scroll lock
-      if (ev.persisted) document.documentElement.classList.remove("nav-locked");
+      if (!ev.persisted) return;
+      if (nav.classList.contains("open")) closeNav(false);        // restore the drawer closed, not half-open over the page
+      document.documentElement.classList.remove("nav-locked");
     });
     links.forEach(function (a) { a.addEventListener("click", function () { closeNav(false); }); });
     var onBreakpoint = function () {        // widening past the drawer breakpoint must not leave the page scroll-locked
@@ -76,56 +78,6 @@
     mq.addEventListener ? mq.addEventListener("change", onBreakpoint) : mq.addListener(onBreakpoint);
     syncInert();
   }
-
-  /* the candle remembers: a returning reader's flame continues where it stopped.
-     Enhancement only — no-JS and first-visit keep the static "Light the first letter".
-     Runs on DOMContentLoaded: app.js executes before ltys.js in defer order, so
-     window.LTYS does not exist yet at parse time. */
-  document.addEventListener("DOMContentLoaded", function () {
-  var chainEl = document.getElementById("ltys-chain");
-  if (chainEl && window.LTYS && LTYS.count() > 0) {
-    try {
-      var chain = JSON.parse(chainEl.textContent || "[]");
-      var escText = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
-      var next = null;
-      if (LTYS.count() < LTYS.total) {
-        var last = LTYS.lastRead(), start = 0;
-        for (var ci = 0; ci < chain.length; ci++) { if (chain[ci].s === last) { start = ci + 1; break; } }
-        for (var cj = 0; cj < chain.length; cj++) {
-          var cand = chain[(start + cj) % chain.length];
-          if (!LTYS.isRead(cand.s)) { next = cand; break; }
-        }
-      }
-      var heroCta = document.querySelector(".hero .hero-cta .btn");
-      if (heroCta) {
-        var line = "";
-        if (!next) {
-          heroCta.innerHTML = 'Return to the letters <span class="arrow">&rarr;</span>';
-          line = "All " + LTYS.total + " lights are lit. Stay as long as you need.";
-        } else {
-          heroCta.setAttribute("href", next.u);
-          heroCta.innerHTML = 'Continue: <em>' + escText(next.t) + '</em> <span class="arrow">&rarr;</span>';
-          line = LTYS.count() + " of " + LTYS.total + " letters lit. The candle remembers.";
-        }
-        if (line) {
-          var ret = document.createElement("p");
-          ret.className = "hero-return";
-          ret.textContent = line;
-          heroCta.parentNode.insertAdjacentElement("afterend", ret);
-        }
-      }
-      // the letters page carries the same thread: phone readers never see the
-      // desktop constellation, so the timeline welcomes them back here
-      var ltHead = document.querySelector(".lt-head");
-      if (ltHead && next) {
-        var cont = document.createElement("p");
-        cont.className = "lt-note lt-continue";
-        cont.innerHTML = 'Continue with <a href="' + next.u + '"><em>' + escText(next.t) + '</em></a> <span aria-hidden="true">&rarr;</span>';
-        ltHead.appendChild(cont);
-      }
-    } catch (e) {}
-  }
-  });
 
   /* scroll reveal */
   var items = document.querySelectorAll("[data-reveal]");
